@@ -1,4 +1,4 @@
-import { isValid, matchesPredicates } from './predicate'
+import { isValid, hasMatchingPredicates } from './predicate'
 
 describe('Predicate', () => {
   it('matches a value when operator is EQUALS', () => {
@@ -28,7 +28,7 @@ describe('Predicate', () => {
       { key: 'country', value: 'SE', operator: 'EQUALS' as const },
     ]
 
-    const result = matchesPredicates(params, predicates)
+    const result = hasMatchingPredicates(params, predicates)
     expect(result).toBe(true)
   })
 
@@ -43,7 +43,7 @@ describe('Predicate', () => {
       { key: 'country', value: 'GB', operator: 'EQUALS' as const },
     ]
 
-    const result = matchesPredicates(params, predicates)
+    const result = hasMatchingPredicates(params, predicates)
     expect(result).toBe(false)
   })
 
@@ -53,7 +53,7 @@ describe('Predicate', () => {
       country: 'SE',
     }
 
-    const result = matchesPredicates(params, [])
+    const result = hasMatchingPredicates(params, [])
     expect(result).toBe(true)
   })
 
@@ -69,7 +69,7 @@ describe('Predicate', () => {
       { key: 'city', value: 'stockholm', operator: 'EQUALS' as const },
     ]
 
-    const result = matchesPredicates(params, predicates)
+    const result = hasMatchingPredicates(params, predicates)
     expect(result).toBe(false)
   })
 
@@ -84,7 +84,7 @@ describe('Predicate', () => {
       { key: 'version', value: '1.0', operator: 'EQUALS' as const },
     ]
 
-    const result = matchesPredicates(params, predicates)
+    const result = hasMatchingPredicates(params, predicates)
     expect(result).toBe(false)
   })
 })

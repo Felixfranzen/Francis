@@ -16,7 +16,7 @@ export const isValid = (
   }
 }
 
-export const matchesPredicates = (
+export const hasMatchingPredicates = (
   params: { [key: string]: string },
   predicates: Predicate[]
 ) => {

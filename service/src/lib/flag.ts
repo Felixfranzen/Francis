@@ -1,5 +1,5 @@
 import { Database } from './database'
-import { matchesPredicates, Predicate } from './predicate'
+import { hasMatchingPredicates, Predicate } from './predicate'
 
 export type Flag = {
   name: string
@@ -9,7 +9,7 @@ export type Flag = {
 
 export const isEnabled = (params: { [key: string]: string }, flags: Flag[]) => {
   const flag = flags
-    .filter((flag) => matchesPredicates(params, flag.predicates))
+    .filter((flag) => hasMatchingPredicates(params, flag.predicates))
     .shift()
   return flag ? flag.enabled : false
 }
