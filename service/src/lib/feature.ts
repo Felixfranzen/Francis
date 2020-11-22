@@ -1,4 +1,3 @@
-import { Database } from './database'
 import { Flag } from './flag'
 
 export type Feature = {
