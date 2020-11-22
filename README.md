@@ -1,2 +1,2 @@
-# francis
+# Francis
 Platform for feature flags
