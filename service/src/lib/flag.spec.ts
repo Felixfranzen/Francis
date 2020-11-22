@@ -1,57 +1,70 @@
-import { Flag, matchesFlag } from './flag'
+import { createDatabase, Database } from './database'
+import { Flag, getFlagsByFeatureKey, isEnabled } from './flag'
+import * as dotenv from 'dotenv'
+import { parseConfig } from '../config'
+dotenv.config()
 
 describe('Flag', () => {
-  it('accepts inputs that matches flag predicates', () => {
+  it('features without flags are not enabled', () => {
     const params = {
       version: '1.0',
       country: 'SE',
     }
+    const flags: Flag[] = []
 
-    const flag: Flag = {
-      name: '',
-      enabled: true,
-      predicates: [
-        { key: 'version', value: '1.0', operator: 'EQUALS' },
-        { key: 'country', value: 'SE', operator: 'EQUALS' },
-      ],
-    }
-
-    const result = matchesFlag(params, flag)
-    expect(result).toBe(true)
+    expect(isEnabled(params, flags)).toBe(false)
   })
 
-  it('rejects inputs that fails one or several predicates', () => {
+  it('can get flag status for a feature', () => {
     const params = {
       version: '1.0',
       country: 'SE',
     }
+    const flags = [
+      {
+        name: '',
+        enabled: true,
+        predicates: [],
+      },
+    ]
 
-    const flag: Flag = {
-      name: '',
-      enabled: true,
-      predicates: [
-        { key: 'version', value: '1.0', operator: 'EQUALS' },
-        { key: 'country', value: 'GB', operator: 'EQUALS' },
-      ],
-    }
-
-    const result = matchesFlag(params, flag)
-    expect(result).toBe(false)
+    expect(isEnabled(params, flags)).toBe(true)
   })
 
-  it('flags without predicates returns enabled', () => {
+  it('uses the first flag status if multiple match', () => {
     const params = {
       version: '1.0',
       country: 'SE',
     }
 
-    const flag: Flag = {
-      name: '',
-      enabled: true,
-      predicates: [],
-    }
+    const flags = [
+      {
+        name: '',
+        enabled: true,
+        predicates: [],
+      },
+      {
+        name: '',
+        enabled: false,
+        predicates: [],
+      },
+    ]
 
-    const result = matchesFlag(params, flag)
-    expect(result).toBe(true)
+    expect(isEnabled(params, flags)).toBe(true)
+  })
+
+  describe('queries', () => {
+    let db: Database
+    beforeAll(async () => {
+      db = await createDatabase(parseConfig(process.env))
+      await db.migrate()
+    })
+    afterAll(async () => {
+      await db.disconnect()
+    })
+
+    it('can get feature by key', async () => {
+      await getFlagsByFeatureKey(db.query, 'FEATURE KEY')
+    })
   })
 })

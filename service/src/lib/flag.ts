@@ -1,4 +1,5 @@
-import { matchesPredicate, Predicate } from './predicate'
+import { Database } from './database'
+import { matchesPredicates, Predicate } from './predicate'
 
 export type Flag = {
   name: string
@@ -6,8 +7,23 @@ export type Flag = {
   predicates: Predicate[]
 }
 
-export const matchesFlag = (params: { [key: string]: string }, flag: Flag) =>
-  flag.predicates.every((predicate) => {
-    const hasKey = params[predicate.key] !== undefined
-    return hasKey && matchesPredicate(params[predicate.key], predicate)
-  })
+export const isEnabled = (params: { [key: string]: string }, flags: Flag[]) => {
+  const flag = flags
+    .filter((flag) => matchesPredicates(params, flag.predicates))
+    .shift()
+  return flag ? flag.enabled : false
+}
+
+export const getFlagsByFeatureKey = async (
+  query: Database['query'],
+  key: string
+): Promise<Flag[]> => {
+  const result = await query
+    .select('flag.name as name', 'enabled', 'predicates')
+    .from('feature')
+    .join('flag', 'flag.feature_id', 'feature.id')
+    .where('key', key)
+
+  // TODO VALIDATE THIS :))
+  return result as Flag[]
+}

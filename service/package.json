@@ -7,18 +7,23 @@
     "up": "docker-compose up -d",
     "down": "docker-compose down",
     "start": "NODE_ENV=development ts-node-dev --inspect=127.0.0.1:9234 ./src",
-    "test": "jest . --passWithNoTests"
+    "test": "jest . --passWithNoTests",
+    "migrate:make": "knex migrate:make --migrations-directory ./src/migrations -x ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.19.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "knex": "^0.21.12",
+    "pg": "^8.5.1",
     "typescript": "^4.1.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.9",
     "@types/jest": "^26.0.15",
+    "@types/knex": "^0.16.1",
     "@types/morgan": "^1.9.2",
     "jest": "^26.6.3",
     "morgan": "^1.10.0",

@@ -6,7 +6,7 @@ export type Predicate = {
   value: string
 }
 
-export const matchesPredicate = (
+export const isValid = (
   value: string,
   predicate: { value: string; operator: Operator }
 ) => {
@@ -15,3 +15,12 @@ export const matchesPredicate = (
       return predicate.value === value
   }
 }
+
+export const matchesPredicates = (
+  params: { [key: string]: string },
+  predicates: Predicate[]
+) =>
+  predicates.every((predicate) => {
+    const hasKey = params[predicate.key] !== undefined
+    return hasKey && isValid(params[predicate.key], predicate)
+  })
