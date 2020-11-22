@@ -56,4 +56,35 @@ describe('Predicate', () => {
     const result = matchesPredicates(params, [])
     expect(result).toBe(true)
   })
+
+  it('returns false if predicates has keys not in params', () => {
+    const params = {
+      version: '1.0',
+      country: 'SE',
+    }
+
+    const predicates = [
+      { key: 'version', value: '1.0', operator: 'EQUALS' as const },
+      { key: 'country', value: 'GB', operator: 'EQUALS' as const },
+      { key: 'city', value: 'stockholm', operator: 'EQUALS' as const },
+    ]
+
+    const result = matchesPredicates(params, predicates)
+    expect(result).toBe(false)
+  })
+
+  it('returns false if params has keys not in predicates', () => {
+    const params = {
+      version: '1.0',
+      country: 'SE',
+      city: 'stockholm',
+    }
+
+    const predicates = [
+      { key: 'version', value: '1.0', operator: 'EQUALS' as const },
+    ]
+
+    const result = matchesPredicates(params, predicates)
+    expect(result).toBe(false)
+  })
 })

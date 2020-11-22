@@ -1,5 +1,5 @@
 import { Database } from './database'
-import { Flag, matchesFlag } from './flag'
+import { Flag } from './flag'
 
 export type Feature = {
   name: string
