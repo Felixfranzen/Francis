@@ -1,4 +1,5 @@
 import { Database } from './database'
+import { Feature, createFeature } from './feature'
 import { getFlagsByFeatureKey, isEnabled } from './flag'
 
 export const createService = (query: Database['query']) => {
@@ -10,7 +11,10 @@ export const createService = (query: Database['query']) => {
     return isEnabled(params, flags)
   }
 
-  return { getFeatureStatus }
+  return {
+    getFeatureStatus,
+    createFeature: (feature: Feature) => createFeature(query, feature),
+  }
 }
 
 export type Service = ReturnType<typeof createService>

@@ -5,6 +5,16 @@ const { Router } = express
 export const createRoutes = (service: Service) => {
   const router = Router()
 
+  router.post('/feature', async (req, res) => {
+    if (!req.body) {
+      res.sendStatus(400)
+      return
+    }
+
+    const result = await service.createFeature(req.body)
+    res.send(result)
+  })
+
   router.post('/feature/status', async (req, res) => {
     if (!req.body || !req.body.feature_key || !req.body.params) {
       res.sendStatus(400)
