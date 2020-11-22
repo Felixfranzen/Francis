@@ -22,9 +22,10 @@ export const createFeature = async (
   const flagsToInsert = feature.flags.map((flag) => ({
     feature_id: featureId,
     ...flag,
+    predicates: JSON.stringify(flag.predicates),
   }))
 
-  await query.table('flags').insert(flagsToInsert)
+  await query.table('flag').insert(flagsToInsert)
 
   return featureId
 }
