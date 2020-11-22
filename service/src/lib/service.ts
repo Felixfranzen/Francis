@@ -1,5 +1,5 @@
 import { Database } from './database'
-import { Feature, createFeature } from './feature'
+import { Feature, createFeature, deleteFeature } from './feature'
 import { getFlagsByFeatureKey, isEnabled } from './flag'
 
 export const createService = (query: Database['query']) => {
@@ -14,6 +14,7 @@ export const createService = (query: Database['query']) => {
   return {
     getFeatureStatus,
     createFeature: (feature: Feature) => createFeature(query, feature),
+    deleteFeature: (id: string) => deleteFeature(query, id),
   }
 }
 

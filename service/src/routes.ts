@@ -15,6 +15,16 @@ export const createRoutes = (service: Service) => {
     res.send(result)
   })
 
+  router.delete('/feature/:id', async (req, res) => {
+    if (!req.params || !req.params.id) {
+      res.sendStatus(400)
+      return
+    }
+
+    const result = await service.deleteFeature(req.params.id)
+    res.send(204)
+  })
+
   router.post('/feature/status', async (req, res) => {
     if (!req.body || !req.body.feature_key || !req.body.params) {
       res.sendStatus(400)
