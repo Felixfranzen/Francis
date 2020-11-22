@@ -21,7 +21,7 @@ export const createRoutes = (service: Service) => {
       return
     }
 
-    const result = await service.deleteFeature(req.params.id)
+    await service.deleteFeature(req.params.id)
     res.send(204)
   })
 
