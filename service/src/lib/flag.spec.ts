@@ -1,5 +1,4 @@
-import { createDatabase, Database } from './database'
-import { Flag, getFlagsByFeatureKey, getMatchingFlags, getStatus } from './flag'
+import { Flag, getMatchingFlags, getStatus } from './flag'
 import * as dotenv from 'dotenv'
 import { parseConfig } from '../config'
 dotenv.config()
@@ -66,20 +65,5 @@ describe('Flag', () => {
 
   it('status is false if no matches', () => {
     expect(getStatus([])).toEqual(false)
-  })
-
-  describe('queries', () => {
-    let db: Database
-    beforeAll(async () => {
-      db = await createDatabase(parseConfig(process.env))
-      await db.migrate()
-    })
-    afterAll(async () => {
-      await db.disconnect()
-    })
-
-    it('can get feature by key', async () => {
-      await getFlagsByFeatureKey(db.query, 'FEATURE KEY')
-    })
   })
 })

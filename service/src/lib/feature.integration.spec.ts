@@ -1,40 +1,71 @@
 import * as uuid from 'uuid'
-import { createFeature, deleteFeature, Feature } from './feature'
+import {
+  createRepository,
+  createService,
+  Feature,
+  FeatureRepository,
+} from './feature'
 import { createDatabase, Database } from './database'
 import * as dotenv from 'dotenv'
 import { parseConfig } from '../config'
+import { Flag } from './flag'
 dotenv.config()
 
-describe('Database', () => {
-  let db: Database
-  beforeAll(async () => {
-    db = await createDatabase(parseConfig(process.env))
+describe('Feature', () => {
+  describe('Repository', () => {
+    let repository: FeatureRepository
+    let db: Database
+    beforeAll(async () => {
+      db = await createDatabase(parseConfig(process.env))
+      await db.migrate()
+      repository = createRepository(db.query)
+    })
+    afterAll(async () => {
+      await db.disconnect()
+    })
+
+    it('can insert a feature', async () => {
+      const feature: Feature = {
+        name: uuid.v4(),
+        key: uuid.v4(),
+        flags: [],
+      }
+
+      const result = await repository.create(feature)
+      expect(result).toBeDefined()
+    })
+
+    it('can delete a feature', async () => {
+      const feature: Feature = {
+        name: uuid.v4(),
+        key: uuid.v4(),
+        flags: [],
+      }
+
+      const result = await repository.create(feature)
+      expect(result).toBeDefined()
+      await repository.delete(result)
+    })
   })
-  afterAll(async () => {
-    await db.disconnect()
-  })
 
-  it('can insert a feature', async () => {
-    const feature: Feature = {
-      name: uuid.v4(),
-      key: uuid.v4(),
-      flags: [],
-    }
+  describe('Service', () => {
+    it('can get feature status', async () => {
+      const mockKey = uuid.v4()
+      const mockFlags: Flag[] = [
+        { name: 'something', enabled: true, predicates: [] },
+      ]
 
-    const result = await createFeature(db.query, feature)
-    expect(result).toBeDefined()
-  })
+      const mockRespository = {
+        getFlagsByFeatureKey: jest
+          .fn()
+          .mockReturnValue(Promise.resolve(mockFlags)),
+        create: jest.fn(),
+        delete: jest.fn(),
+      }
 
-  it('can delete a feature', async () => {
-    const feature: Feature = {
-      name: uuid.v4(),
-      key: uuid.v4(),
-      flags: [],
-    }
-
-    const result = await createFeature(db.query, feature)
-    expect(result).toBeDefined()
-
-    await deleteFeature(db.query, result)
+      const service = createService(mockRespository)
+      const result = await service.getStatus(mockKey, {})
+      expect(result).toBe(true)
+    })
   })
 })

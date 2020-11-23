@@ -1,8 +1,8 @@
 import * as express from 'express'
-import { Service } from './lib/service'
+import { FeatureService } from './lib/feature'
 const { Router } = express
 
-export const createRoutes = (service: Service) => {
+export const createRoutes = (featureService: FeatureService) => {
   const router = Router()
 
   router.post('/feature', async (req, res) => {
@@ -11,7 +11,7 @@ export const createRoutes = (service: Service) => {
       return
     }
 
-    const result = await service.createFeature(req.body)
+    const result = await featureService.create(req.body)
     res.send(result)
   })
 
@@ -21,7 +21,7 @@ export const createRoutes = (service: Service) => {
       return
     }
 
-    await service.deleteFeature(req.params.id)
+    await featureService.delete(req.params.id)
     res.send(204)
   })
 
@@ -31,7 +31,7 @@ export const createRoutes = (service: Service) => {
       return
     }
     const { feature_key, params } = req.body
-    const result = await service.getFeatureStatus(feature_key, params)
+    const result = await featureService.getStatus(feature_key, params)
     res.send(result)
   })
 

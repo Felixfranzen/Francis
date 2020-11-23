@@ -1,16 +1,17 @@
 import * as morgan from 'morgan'
 import * as express from 'express'
+import * as bodyParser from 'body-parser'
 import { createRoutes } from './routes'
 import { createDatabase } from './lib/database'
 import { Config } from './config'
-import { createService } from './lib/service'
-import bodyParser = require('body-parser')
+import { createService, createRepository } from './lib/feature'
 
 export const createApp = async (config: Config) => {
   const app = express()
 
   const database = await createDatabase(config)
-  const service = createService(database.query)
+  const repository = createRepository(database.query)
+  const service = createService(repository)
 
   app.use(morgan('tiny'))
   app.use(bodyParser.json())

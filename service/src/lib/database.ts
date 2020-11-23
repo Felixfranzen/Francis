@@ -43,9 +43,7 @@ export const createDatabase = async (dbConfig: Config): Promise<Database> => {
     }
   }
 
-  const disconnect = async () => {
-    knex.destroy()
-  }
+  const disconnect = () => knex.destroy()
 
   return { isAlive, disconnect, migrate, query: knex }
 }
