@@ -7,11 +7,14 @@ export type Flag = {
   predicates: Predicate[]
 }
 
-export const isEnabled = (params: { [key: string]: string | number }, flags: Flag[]) => {
-  const flag = flags
-    .filter((flag) => hasMatchingPredicates(params, flag.predicates))
-    .shift()
-  return flag ? flag.enabled : false
+export const getMatchingFlags = (
+  params: { [key: string]: string | number },
+  allFlags: Flag[]
+) => allFlags.filter((flag) => hasMatchingPredicates(params, flag.predicates))
+
+export const getStatus = (matchingFeatureFlags: Flag[]) => {
+  const result = matchingFeatureFlags.shift()
+  return result ? result.enabled : false
 }
 
 export const getFlagsByFeatureKey = async (

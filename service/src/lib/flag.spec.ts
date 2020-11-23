@@ -1,56 +1,71 @@
 import { createDatabase, Database } from './database'
-import { Flag, getFlagsByFeatureKey, isEnabled } from './flag'
+import { Flag, getFlagsByFeatureKey, getMatchingFlags, getStatus } from './flag'
 import * as dotenv from 'dotenv'
 import { parseConfig } from '../config'
 dotenv.config()
 
 describe('Flag', () => {
-  it('features without flags are not enabled', () => {
+  it('can get matching flags by params and predicate', () => {
     const params = {
       version: '1.0',
       country: 'SE',
     }
-    const flags: Flag[] = []
-
-    expect(isEnabled(params, flags)).toBe(false)
-  })
-
-  it('can get flag status for a feature', () => {
-    const params = {
-      version: '1.0',
-      country: 'SE',
-    }
-    const flags = [
+    const flags: Flag[] = [
       {
-        name: '',
+        name: 'one',
         enabled: true,
-        predicates: [],
+        predicates: [
+          { key: 'version', value: '1.0', operator: 'EQUALS' },
+          { key: 'country', value: 'SE', operator: 'EQUALS' },
+        ],
       },
     ]
 
-    expect(isEnabled(params, flags)).toBe(true)
+    expect(getMatchingFlags(params, flags)).toEqual(flags)
   })
-
-  it('uses the first flag status if multiple match', () => {
+  it('discards flags that where predicate fails', () => {
     const params = {
       version: '1.0',
       country: 'SE',
     }
-
-    const flags = [
+    const flags: Flag[] = [
       {
-        name: '',
+        name: 'one',
         enabled: true,
         predicates: [],
       },
       {
-        name: '',
+        name: 'two',
+        enabled: true,
+        predicates: [
+          { key: 'version', value: '3.0', operator: 'EQUALS' },
+          { key: 'country', value: 'GB', operator: 'EQUALS' },
+        ],
+      },
+    ]
+
+    expect(getMatchingFlags(params, flags)).toEqual([flags[0]])
+  })
+
+  it('selects status of first flag in list of matches', () => {
+    const flags: Flag[] = [
+      {
+        name: 'one',
+        enabled: true,
+        predicates: [],
+      },
+      {
+        name: 'two',
         enabled: false,
         predicates: [],
       },
     ]
 
-    expect(isEnabled(params, flags)).toBe(true)
+    expect(getStatus(flags)).toEqual(true)
+  })
+
+  it('status is false if no matches', () => {
+    expect(getStatus([])).toEqual(false)
   })
 
   describe('queries', () => {
