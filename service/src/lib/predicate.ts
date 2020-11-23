@@ -1,23 +1,36 @@
-type Operator = 'EQUALS'
-
-export type Predicate = {
-  operator: Operator
+type Equality = {
+  operator: 'EQUALS'
   key: string
-  value: string
+  value: string | number
 }
 
-export const isValid = (
-  value: string,
-  predicate: { value: string; operator: Operator }
-) => {
+type GreaterThan = {
+  operator: 'GREATER_THAN'
+  key: string
+  value: string | number
+}
+
+type Includes = {
+  operator: 'INCLUDES'
+  key: string
+  value: (string | number)[]
+}
+
+export type Predicate = Equality | GreaterThan | Includes
+
+export const isValid = (value: string | number, predicate: Predicate) => {
   switch (predicate.operator) {
     case 'EQUALS':
       return predicate.value === value
+    case 'GREATER_THAN':
+      return value > predicate.value
+    case 'INCLUDES':
+      return predicate.value.includes(value)
   }
 }
 
 export const hasMatchingPredicates = (
-  params: { [key: string]: string },
+  params: { [key: string]: string | number },
   predicates: Predicate[]
 ) => {
   if (predicates.length === 0) {

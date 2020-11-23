@@ -7,7 +7,7 @@ export type Flag = {
   predicates: Predicate[]
 }
 
-export const isEnabled = (params: { [key: string]: string }, flags: Flag[]) => {
+export const isEnabled = (params: { [key: string]: string | number }, flags: Flag[]) => {
   const flag = flags
     .filter((flag) => hasMatchingPredicates(params, flag.predicates))
     .shift()

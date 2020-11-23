@@ -4,6 +4,7 @@ describe('Predicate', () => {
   it('matches a value when operator is EQUALS', () => {
     expect(
       isValid('ipsum', {
+        key: '',
         operator: 'EQUALS',
         value: 'ipsum',
       })
@@ -11,8 +12,45 @@ describe('Predicate', () => {
 
     expect(
       isValid('ipsum', {
+        key: '',
         operator: 'EQUALS',
         value: 'lorem',
+      })
+    ).toBe(false)
+  })
+
+  it('matches a value when operator is GREATER_THAN', () => {
+    expect(
+      isValid(6, {
+        key: '',
+        operator: 'GREATER_THAN',
+        value: 1,
+      })
+    ).toBe(true)
+
+    expect(
+      isValid(1, {
+        key: '',
+        operator: 'GREATER_THAN',
+        value: 5,
+      })
+    ).toBe(false)
+  })
+
+  it('matches a value when operator is INCLUDES', () => {
+    expect(
+      isValid(1, {
+        key: '',
+        operator: 'INCLUDES',
+        value: [1,2,3],
+      })
+    ).toBe(true)
+
+    expect(
+      isValid(99, {
+        key: '',
+        operator: 'INCLUDES',
+        value: [1,2,3],
       })
     ).toBe(false)
   })
