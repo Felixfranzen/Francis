@@ -30,10 +30,6 @@ export const createDatabase = async (dbConfig: Config): Promise<Database> => {
   }
   const knex = Knex(config)
 
-  const migrate = async () => {
-    await knex.migrate.latest()
-  }
-
   const isAlive = async () => {
     try {
       await knex.raw('select 1')
@@ -43,6 +39,7 @@ export const createDatabase = async (dbConfig: Config): Promise<Database> => {
     }
   }
 
+  const migrate = () => knex.migrate.latest()
   const disconnect = () => knex.destroy()
 
   return { isAlive, disconnect, migrate, query: knex }
