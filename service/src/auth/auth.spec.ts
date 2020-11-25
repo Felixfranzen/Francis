@@ -37,9 +37,10 @@ describe('Auth', () => {
     })
 
     it('does not store plain text password on signup', async () => {
+      const mockEncryptedPassword = 'asuperlongencryptedvaluethatsnotplaintext'
       const passwordUtils = {
         ...emptyPasswordUtils,
-        encrypt: jest.fn().mockResolvedValue('asuperlongencryptedvaluethatsnotplaintext'),
+        encrypt: jest.fn().mockResolvedValue(mockEncryptedPassword),
       }
       const jwtService: JwtUtils = {
         sign: jest.fn().mockReturnValue(Promise.resolve('token')),
@@ -55,11 +56,12 @@ describe('Auth', () => {
         createUser: mockCreateUser,
         getFullUserByEmail: jest.fn(),
       }
-      const service = createService(emptyPasswordUtils, jwtService, repository)
+      const service = createService(passwordUtils, jwtService, repository)
       await service.signUp(mockEmail, mockPassword)
-      const [calledEmail, calledPassword] = mockCreateUser.mock.calls[0]
+      expect(passwordUtils.encrypt).toHaveBeenCalledWith(mockPassword)
 
-      expect(calledPassword).not.toBe(mockPassword)
+      const [calledEmail, calledPassword] = mockCreateUser.mock.calls[0]
+      expect(calledPassword).toBe(mockEncryptedPassword)
     })
 
     it('can login', async () => {
