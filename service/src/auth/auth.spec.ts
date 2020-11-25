@@ -37,6 +37,10 @@ describe('Auth', () => {
     })
 
     it('does not store plain text password on signup', async () => {
+      const passwordUtils = {
+        ...emptyPasswordUtils,
+        encrypt: jest.fn().mockResolvedValue('asuperlongencryptedvaluethatsnotplaintext'),
+      }
       const jwtService: JwtUtils = {
         sign: jest.fn().mockReturnValue(Promise.resolve('token')),
         verifyAndDecode: jest.fn(),
