@@ -9,10 +9,21 @@ export async function up(knex: Knex): Promise<void> {
 
   await knex.schema.createTable('flag', (table) => {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'))
-    table.uuid('feature_id').notNullable().references('id').inTable('feature').onDelete('CASCADE')
+    table
+      .uuid('feature_id')
+      .notNullable()
+      .references('id')
+      .inTable('feature')
+      .onDelete('CASCADE')
     table.string('name').notNullable()
     table.boolean('enabled').notNullable().defaultTo(false)
     table.jsonb('predicates').notNullable().defaultTo([])
+  })
+
+  await knex.schema.createTable('user', (table) => {
+    table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'))
+    table.string('email').notNullable()
+    table.string('password').notNullable()
   })
 }
 
