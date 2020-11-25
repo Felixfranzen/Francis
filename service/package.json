@@ -32,10 +32,12 @@
     "@types/jsonwebtoken": "^8.5.0",
     "@types/knex": "^0.16.1",
     "@types/morgan": "^1.9.2",
+    "@types/supertest": "^2.0.10",
     "@types/uuid": "^8.3.0",
     "jest": "^26.6.3",
     "morgan": "^1.10.0",
     "prettier": "2.2.0",
+    "supertest": "^6.0.1",
     "ts-jest": "^26.4.4",
     "ts-node-dev": "^1.0.0"
   }

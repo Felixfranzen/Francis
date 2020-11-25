@@ -4,6 +4,8 @@ import { JwtUtils } from './jwt'
 import { Request, Response, NextFunction } from 'express'
 import { Password } from './password'
 
+type Role = 'user' | 'admin'
+
 const getFullUserByEmail = async (
   query: Database['query'],
   email: string
@@ -12,7 +14,7 @@ const getFullUserByEmail = async (
       id: string
       email: string
       password: string
-      role: 'user' | 'admin'
+      role: Role
     }
   | undefined
 > => {
@@ -27,7 +29,7 @@ const getFullUserByEmail = async (
 const createUser = async (
   query: Database['query'],
   email: string,
-  hashedPassword: string
+  hashedPassword: string // TODO change signature
 ) => {
   const featureIds = await query
     .table('user')
@@ -104,6 +106,11 @@ export const createAuthMiddleware = (jwtUtils: JwtUtils) => {
   ) => {
     try {
       const jwt = req.cookies.access_token
+      if (!jwt) {
+        res.sendStatus(401)
+        return
+      }
+
       await jwtUtils.verifyAndDecode(jwt)
       next()
     } catch (e) {
@@ -111,13 +118,17 @@ export const createAuthMiddleware = (jwtUtils: JwtUtils) => {
     }
   }
 
-  const verifyRole = (allowedRoles: string[]) => async (
+  const verifyRole = (allowedRoles: Role[]) => async (
     req: Request,
     res: Response,
     next: NextFunction
   ) => {
     try {
       const jwt = req.cookies.access_token
+      if (!jwt) {
+        res.sendStatus(401)
+        return
+      }
 
       // TODO validate properly
       const decodedToken = (await jwtUtils.verifyAndDecode(jwt)) as any
