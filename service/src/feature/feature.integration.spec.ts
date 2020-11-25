@@ -5,7 +5,7 @@ import {
   Feature,
   FeatureRepository,
 } from './feature'
-import { createDatabase, Database } from './database'
+import { createDatabase, Database } from '../lib/database'
 import * as dotenv from 'dotenv'
 import { parseConfig } from '../config'
 import { Flag } from './flag'

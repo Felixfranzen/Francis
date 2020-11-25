@@ -1,6 +1,5 @@
-import * as express from 'express'
-import { FeatureService } from './lib/feature'
-const { Router } = express
+import { Router } from 'express'
+import { FeatureService } from './feature'
 
 export const createRoutes = (featureService: FeatureService) => {
   const router = Router()

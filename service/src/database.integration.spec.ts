@@ -1,6 +1,6 @@
 import { createDatabase, Database } from './database'
 import * as dotenv from 'dotenv'
-import { parseConfig } from '../config'
+import { parseConfig } from './config'
 dotenv.config()
 
 describe('Database', () => {

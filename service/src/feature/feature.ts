@@ -1,4 +1,4 @@
-import { Database } from './database'
+import { Database } from '../database'
 import { Flag, getMatchingFlags, getStatus } from './flag'
 
 export type Feature = {
