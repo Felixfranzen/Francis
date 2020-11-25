@@ -15,4 +15,4 @@ export const encrypt = async (password: Password) => {
   return encrypted as Password // TODO or just string?
 }
 export const isEqual = (password: Password, encryptedPassword: string) =>
-  bcrypt.compare(encryptedPassword, password)
+  bcrypt.compare(password, encryptedPassword)
