@@ -16,7 +16,7 @@ describe('Auth', () => {
   })
 
   describe('Middleware', () => {
-    it('sends 401 if not access token found in cookie', async () => {
+    it('sends 401 if no access token found in cookie', async () => {
       const jwtUtls = { sign: jest.fn(), verifyAndDecode: jest.fn() }
       const middleware = createAuthMiddleware(jwtUtls)
       const app = createApp()
@@ -61,7 +61,7 @@ describe('Auth', () => {
         .set('Cookie', 'access_token=doesntmatter')
     })
 
-    it('can protect a route that requires a valid jwt and the correct role', async () => {
+    it('sends 403 if a valid access token contains an invalid role', async () => {
       const jwtUtls = {
         sign: jest.fn(),
         verifyAndDecode: jest.fn().mockRejectedValue({ role: 'user' }),
