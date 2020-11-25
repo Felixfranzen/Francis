@@ -22,8 +22,9 @@ export async function up(knex: Knex): Promise<void> {
 
   await knex.schema.createTable('user', (table) => {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'))
-    table.string('email').notNullable()
+    table.string('email').notNullable().unique()
     table.string('password').notNullable()
+    table.enum('role', ['user', 'admin']).notNullable()
   })
 }
 

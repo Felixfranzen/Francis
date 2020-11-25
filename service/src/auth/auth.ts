@@ -1,8 +1,7 @@
 import { Database } from '../database'
-import * as uuid from 'uuid'
 import * as bcrypt from 'bcrypt'
-
-const generateJwtToken = () => ''
+import { JwtService } from './jwt'
+import { Request, Response, NextFunction } from 'express'
 
 const getFullUserByEmail = async (query: Database['query'], email: string) => {
   const result = await query.select('*').from('user').where({ email }).limit(1)
@@ -20,7 +19,7 @@ const createUser = async (
 ) => {
   const featureIds = await query
     .table('user')
-    .insert({ email, password: hashedPassword })
+    .insert({ email, password: hashedPassword, role: 'user' })
     .returning('id')
 
   // todo validate and fix :)))
@@ -38,15 +37,19 @@ export const createRepository = (query: Database['query']) => {
 
 export type AuthRepository = ReturnType<typeof createRepository>
 
-export const createService = (repository: AuthRepository) => {
+export const createService = (
+  jwtService: JwtService,
+  repository: AuthRepository
+) => {
   const signUp = async (email: string, password: string) => {
     const salt = await bcrypt.genSalt()
     const hashedPassword = await bcrypt.hash(password, salt)
     const userId = await repository.createUser(email, hashedPassword)
+    const token = await jwtService.sign({ id: userId, email })
     return {
       email: email,
       id: userId,
-      token: generateJwtToken(),
+      token,
     }
   }
 
@@ -61,10 +64,11 @@ export const createService = (repository: AuthRepository) => {
       throw new Error('Invalid username/password')
     }
 
+    const token = await jwtService.sign({ id: user.id, email })
     return {
       email: user.email,
       id: user.id,
-      token: generateJwtToken(),
+      token,
     }
   }
 
@@ -72,3 +76,46 @@ export const createService = (repository: AuthRepository) => {
 }
 
 export type AuthService = ReturnType<typeof createService>
+
+export const createAuthMiddleware = (jwtServie: JwtService) => {
+  const verifyToken = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const jwt = req.cookies.access_token
+      await jwtServie.verifyAndDecode(jwt)
+      next()
+    } catch (e) {
+      res.sendStatus(401)
+    }
+  }
+
+  const verifyRole = (allowedRoles: string[]) => async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const jwt = req.cookies.jwt
+
+      const decodedToken = (await jwtServie.verifyAndDecode(jwt)) as any
+      const isAllowed =
+        decodedToken.role && allowedRoles.includes(decodedToken.role)
+
+      if (!isAllowed) {
+        res.sendStatus(403)
+        return
+      }
+
+      next()
+    } catch (e) {
+      res.sendStatus(403)
+    }
+  }
+
+  return { verifyToken, verifyRole }
+}
+
+export type AuthMiddleware = ReturnType<typeof createAuthMiddleware>

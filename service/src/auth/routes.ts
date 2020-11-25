@@ -1,7 +1,10 @@
 import { Router } from 'express'
-import { AuthService } from './auth'
+import { AuthMiddleware, AuthService } from './auth'
 
-export const createRoutes = (authService: AuthService) => {
+export const createRoutes = (
+  middleware: AuthMiddleware,
+  authService: AuthService
+) => {
   const router = Router()
 
   router.post('/signup', async (req, res) => {
@@ -11,8 +14,8 @@ export const createRoutes = (authService: AuthService) => {
     }
 
     const result = await authService.signUp(req.body.email, req.body.password)
-    // todo set httpOnly Cookie with jwt token
-    res.send(result)
+    res.cookie('access_token', result.token, { maxAge: 900000, httpOnly: true })
+    res.send(200)
   })
 
   router.post('/login', async (req, res) => {
@@ -22,8 +25,21 @@ export const createRoutes = (authService: AuthService) => {
       return
     }
 
-    const result = await authService.login(req.body.email, req.body.password)
-    res.send(result)
+    try {
+      const result = await authService.signUp(req.body.email, req.body.password)
+      res.cookie('access_token', result.token, {
+        maxAge: 900000,
+        httpOnly: true,
+      })
+      res.send(200)
+    } catch (e) {
+      res.sendStatus(401)
+    }
+  })
+
+  router.get('/me', middleware.verifyToken, (req, res) => {
+    // TODO
+    res.send(200)
   })
 
   return router
