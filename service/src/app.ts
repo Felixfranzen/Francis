@@ -15,23 +15,28 @@ import {
   createRepository as createAuthRepository,
   createAuthMiddleware,
 } from './auth/auth'
+import { encrypt, isEqual } from './auth/password'
 
-import { createService as createJwtService } from './auth/jwt'
+import { createUtils as createJwtUtils } from './auth/jwt'
 
 export const createApp = async (config: Config) => {
   const app = express()
 
   const database = await createDatabase(config)
 
-  const jwtService = createJwtService(config.AUTH_SECRET)
+  const jwtUtils = createJwtUtils(config.AUTH_SECRET)
 
   const featureRepository = createFeatureRepository(database.query)
   const featureService = createFeatureService(featureRepository)
 
   const authRepository = createAuthRepository(database.query)
-  const authService = createAuthService(jwtService, authRepository)
+  const authService = createAuthService(
+    { encrypt, isEqual },
+    jwtUtils,
+    authRepository
+  )
 
-  const authMiddleware = createAuthMiddleware(jwtService)
+  const authMiddleware = createAuthMiddleware(jwtUtils)
 
   app.use(morgan('tiny'))
   app.use(bodyParser.json())

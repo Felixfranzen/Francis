@@ -1,15 +1,20 @@
 import { createService } from './auth'
 import { AuthRepository } from './auth'
-import { JwtService } from './jwt'
+import { JwtUtils } from './jwt'
 import * as uuid from 'uuid'
-import { validatePassword } from './password'
+import { Password, validatePassword } from './password'
 import * as bcrypt from 'bcrypt'
 
 describe('Auth', () => {
   describe('Service', () => {
+    const emptyPasswordUtils = {
+      encrypt: jest.fn(),
+      isEqual: jest.fn(),
+    }
+
     it('can signup a user with valid email and password', async () => {
       const mockToken = 'mytoken'
-      const jwtService: JwtService = {
+      const jwtService: JwtUtils = {
         sign: jest.fn().mockReturnValue(Promise.resolve(mockToken)),
         verifyAndDecode: jest.fn(),
       }
@@ -23,7 +28,7 @@ describe('Auth', () => {
         getFullUserByEmail: jest.fn(),
       }
 
-      const service = createService(jwtService, repository)
+      const service = createService(emptyPasswordUtils, jwtService, repository)
       const result = await service.signUp(mockEmail, mockPassword)
 
       expect(result.email).toBe(mockEmail)
@@ -32,7 +37,7 @@ describe('Auth', () => {
     })
 
     it('does not store plain text password on signup', async () => {
-      const jwtService: JwtService = {
+      const jwtService: JwtUtils = {
         sign: jest.fn().mockReturnValue(Promise.resolve('token')),
         verifyAndDecode: jest.fn(),
       }
@@ -46,7 +51,7 @@ describe('Auth', () => {
         createUser: mockCreateUser,
         getFullUserByEmail: jest.fn(),
       }
-      const service = createService(jwtService, repository)
+      const service = createService(emptyPasswordUtils, jwtService, repository)
       await service.signUp(mockEmail, mockPassword)
       const [calledEmail, calledPassword] = mockCreateUser.mock.calls[0]
 
@@ -54,12 +59,13 @@ describe('Auth', () => {
     })
 
     it('can login', async () => {
-      // sorry!
-      const temp = bcrypt.compare
-      ;(bcrypt.compare as any) = jest.fn().mockResolvedValue(true)
+      const passwordUtils = {
+        ...emptyPasswordUtils,
+        isEqual: jest.fn().mockResolvedValue(true),
+      }
 
       const mockToken = 'mytoken'
-      const jwtService: JwtService = {
+      const jwtService: JwtUtils = {
         sign: jest.fn().mockResolvedValue(mockToken),
         verifyAndDecode: jest.fn(),
       }
@@ -75,7 +81,7 @@ describe('Auth', () => {
         getFullUserByEmail: jest.fn().mockResolvedValue(mockUser),
       }
 
-      const service = createService(jwtService, repository)
+      const service = createService(passwordUtils, jwtService, repository)
       const result = await service.login(
         mockUser.email,
         validatePassword(mockUser.password)
@@ -84,14 +90,11 @@ describe('Auth', () => {
       expect(result.email).toBe(mockUser.email)
       expect(result.id).toBe(mockUser.id)
       expect(result.token).toBe(mockToken)
-
-      // sorry!
-      ;(bcrypt.compare as any) = temp
     })
 
     describe('Fails', () => {
-      // will not be mocked in these tests
-      const jwtService: JwtService = {
+      // will not be mocked in the following tests
+      const jwtService: JwtUtils = {
         sign: jest.fn(),
         verifyAndDecode: jest.fn(),
       }
@@ -108,7 +111,11 @@ describe('Auth', () => {
           getFullUserByEmail: jest.fn().mockResolvedValue(mockUser),
         }
 
-        const service = createService(jwtService, repository)
+        const service = createService(
+          emptyPasswordUtils,
+          jwtService,
+          repository
+        )
         expect(() =>
           service.login(
             'someinvalidemail@invalid.com',
@@ -118,10 +125,10 @@ describe('Auth', () => {
       })
 
       it('can not login when password is invalid', async () => {
-        // sorry!
-        const temp = bcrypt.compare
-        ;(bcrypt.compare as any) = jest.fn().mockResolvedValue(false)
-
+        const passwordUtils = {
+          ...emptyPasswordUtils,
+          isEqual: jest.fn().mockResolvedValue(false),
+        }
         const mockUser = {
           id: uuid.v4(),
           email: 'hello@felix.franzen.com',
@@ -133,16 +140,13 @@ describe('Auth', () => {
           getFullUserByEmail: jest.fn().mockResolvedValue(mockUser),
         }
 
-        const service = createService(jwtService, repository)
+        const service = createService(passwordUtils, jwtService, repository)
         expect(() =>
           service.login(
             mockUser.email,
             validatePassword('somethingcompletelydifferent')
           )
         ).rejects.toBeDefined()
-
-        // sorry!
-        ;(bcrypt.compare as any) = temp
       })
     })
   })
