@@ -4,17 +4,18 @@ import { JwtUtils } from './jwt'
 import { Request, Response, NextFunction } from 'express'
 import { Password } from './password'
 
-type User = {
-  id: string
-  email: string
-  password: string
-  role: 'user' | 'admin'
-}
-
 const getFullUserByEmail = async (
   query: Database['query'],
   email: string
-): Promise<User | undefined> => {
+): Promise<
+  | {
+      id: string
+      email: string
+      password: string
+      role: 'user' | 'admin'
+    }
+  | undefined
+> => {
   const result = await query.select('*').from('user').where({ email }).limit(1)
   if (!result) {
     return

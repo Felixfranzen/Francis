@@ -19,7 +19,6 @@ export const createRoutes = (
   })
 
   router.post('/login', async (req, res) => {
-    // todo read from httpOnly cookie instead
     if (!req.body) {
       res.sendStatus(400)
       return
