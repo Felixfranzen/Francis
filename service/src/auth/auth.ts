@@ -2,8 +2,19 @@ import { Database } from '../database'
 import * as bcrypt from 'bcrypt'
 import { JwtService } from './jwt'
 import { Request, Response, NextFunction } from 'express'
+import { Password } from './password'
 
-const getFullUserByEmail = async (query: Database['query'], email: string) => {
+type User = {
+  id: string
+  email: string
+  password: string
+  role: 'user' | 'admin'
+}
+
+const getFullUserByEmail = async (
+  query: Database['query'],
+  email: string
+): Promise<User | undefined> => {
   const result = await query.select('*').from('user').where({ email }).limit(1)
   if (!result) {
     return
@@ -41,9 +52,8 @@ export const createService = (
   jwtService: JwtService,
   repository: AuthRepository
 ) => {
-  const signUp = async (email: string, password: string) => {
-    const salt = await bcrypt.genSalt()
-    const hashedPassword = await bcrypt.hash(password, salt)
+  const signUp = async (email: string, password: Password) => {
+    const hashedPassword = await bcrypt.hash(password, 10)
     const userId = await repository.createUser(email, hashedPassword)
     const token = await jwtService.sign({ id: userId, email })
     return {
@@ -53,13 +63,13 @@ export const createService = (
     }
   }
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: Password) => {
     const user = await repository.getFullUserByEmail(email)
     if (!user) {
       throw new Error('User not found')
     }
 
-    const isCorrectPassword = bcrypt.compareSync(password, user.password)
+    const isCorrectPassword = await bcrypt.compare(password, user.password)
     if (!isCorrectPassword) {
       throw new Error('Invalid username/password')
     }
