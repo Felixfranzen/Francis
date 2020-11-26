@@ -46,10 +46,6 @@ export const createApp = async (config: Config) => {
   app.use(createFeatureRoutes(authMiddleware, featureService))
   app.use(createAuthRoutes(authMiddleware, authService))
 
-  app.get('/secret', authMiddleware.verifyToken, (req, res) => {
-    res.send('success!!')
-  })
-
   return {
     start: async () => {
       await database.migrate()
