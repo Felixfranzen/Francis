@@ -1,8 +1,13 @@
 import { Router } from 'express'
+import { AuthMiddleware } from '../auth/auth'
 import { FeatureService } from './feature'
 
-export const createRoutes = (featureService: FeatureService) => {
+export const createRoutes = (
+  authMiddleware: AuthMiddleware,
+  featureService: FeatureService
+) => {
   const router = Router()
+  router.use(authMiddleware.verifyToken)
 
   router.post('/feature', async (req, res) => {
     if (!req.body) {

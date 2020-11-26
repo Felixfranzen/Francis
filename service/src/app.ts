@@ -43,7 +43,7 @@ export const createApp = async (config: Config) => {
   app.use(cookieParser())
   app.use(bodyParser.urlencoded({ extended: false }))
 
-  app.use(createFeatureRoutes(featureService))
+  app.use(createFeatureRoutes(authMiddleware, featureService))
   app.use(createAuthRoutes(authMiddleware, authService))
 
   app.get('/secret', authMiddleware.verifyToken, (req, res) => {
