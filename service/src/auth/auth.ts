@@ -36,6 +36,7 @@ export const createRepository = (query: Database['query']) => {
   const createVerificationToken = async (userId: string) => {
     const token = crypto.randomBytes(16).toString('hex')
     await query(insertVerificationToken, { userId, token: token })
+    return token
   }
 
   const verifyUser = async (token: string) => {
