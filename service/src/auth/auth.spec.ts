@@ -25,7 +25,7 @@ describe('Auth', () => {
       const repository: AuthRepository = {
         createUser: jest.fn().mockReturnValue(Promise.resolve(mockId)),
         getFullUserByEmail: jest.fn(),
-        createVerificationtoken: jest.fn(),
+        createVerificationToken: jest.fn(),
         verifyUser: jest.fn(),
       }
 
@@ -56,7 +56,7 @@ describe('Auth', () => {
       const repository: AuthRepository = {
         createUser: mockCreateUser,
         getFullUserByEmail: jest.fn(),
-        createVerificationtoken: jest.fn(),
+        createVerificationToken: jest.fn(),
         verifyUser: jest.fn(),
       }
       const service = createService(passwordUtils, jwtService, repository)
@@ -88,7 +88,7 @@ describe('Auth', () => {
       const repository: AuthRepository = {
         createUser: jest.fn(),
         getFullUserByEmail: jest.fn().mockResolvedValue(mockUser),
-        createVerificationtoken: jest.fn(),
+        createVerificationToken: jest.fn(),
         verifyUser: jest.fn(),
       }
 
@@ -120,7 +120,7 @@ describe('Auth', () => {
         const repository: AuthRepository = {
           createUser: jest.fn(),
           getFullUserByEmail: jest.fn().mockResolvedValue(mockUser),
-          createVerificationtoken: jest.fn(),
+          createVerificationToken: jest.fn(),
           verifyUser: jest.fn(),
         }
 
@@ -153,7 +153,7 @@ describe('Auth', () => {
         const repository: AuthRepository = {
           createUser: jest.fn(),
           getFullUserByEmail: jest.fn().mockResolvedValue(mockUser),
-          createVerificationtoken: jest.fn(),
+          createVerificationToken: jest.fn(),
           verifyUser: jest.fn(),
         }
 
