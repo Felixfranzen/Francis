@@ -74,8 +74,8 @@ export const createService = (
   const signUp = async (email: string, password: Password) => {
     const hashedPassword = await passwordUtils.encrypt(password)
     const userId = await repository.createUser(email, hashedPassword, 'user')
-    const token = await jwtUtils.sign({ id: userId, email })
     const verificationToken = await repository.createVerificationtoken(userId)
+    const token = await jwtUtils.sign({ id: userId, email })
 
     return {
       email: email,
