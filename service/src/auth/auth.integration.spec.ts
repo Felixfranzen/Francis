@@ -1,4 +1,4 @@
-import cookieParser = require('cookie-parser')
+import * as cookieParser from 'cookie-parser'
 import * as express from 'express'
 import * as supertest from 'supertest'
 import { createAuthMiddleware } from './auth'
@@ -13,6 +13,8 @@ describe('Auth', () => {
   describe('Repository', () => {
     it('can get user by email', () => {})
     it('can create a user', () => {})
+    it('can create a verification token', () => {})
+    it('can validate a user', () => {})
   })
 
   describe('Middleware', () => {
