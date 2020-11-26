@@ -20,7 +20,7 @@ export async function up(knex: Knex): Promise<void> {
     table.jsonb('predicates').notNullable().defaultTo([])
   })
 
-  await knex.schema.createTable('user', (table) => {
+  await knex.schema.createTable('user_account', (table) => {
     table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'))
     table.string('email').notNullable().unique()
     table.string('password').notNullable()
@@ -34,7 +34,7 @@ export async function up(knex: Knex): Promise<void> {
       .uuid('user_id')
       .notNullable()
       .references('id')
-      .inTable('user')
+      .inTable('user_account')
       .onDelete('CASCADE')
     table.string('token').notNullable()
     table.timestamp('created_at').notNullable().defaultTo(knex.raw('NOW()'))
