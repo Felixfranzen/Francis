@@ -7,7 +7,12 @@ export const createRoutes = (
   featureService: FeatureService
 ) => {
   const router = Router()
-  router.use(authMiddleware.verifyToken)
+  // router.use(authMiddleware.verifyToken)
+  // router.use(authMiddleware.verifyFeatureAccess())
+  // verifyUseraccess = (req) =>
+  // 1. get user_id from jwt token
+  // 2. check if token.user_id is same as req.params.user_id
+
 
   router.post('/feature', async (req, res) => {
     if (!req.body) {

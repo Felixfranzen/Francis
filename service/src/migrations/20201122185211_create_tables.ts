@@ -25,6 +25,19 @@ export async function up(knex: Knex): Promise<void> {
     table.string('email').notNullable().unique()
     table.string('password').notNullable()
     table.enum('role', ['user', 'admin']).notNullable()
+    table.string('is_verified').notNullable().defaultTo(false)
+  })
+
+  await knex.schema.createTable('verification_token', (table) => {
+    table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'))
+    table
+      .uuid('user_id')
+      .notNullable()
+      .references('id')
+      .inTable('user')
+      .onDelete('CASCADE')
+    table.string('token').notNullable()
+    table.timestamp('created_at').notNullable().defaultTo(knex.raw('NOW()'))
   })
 }
 

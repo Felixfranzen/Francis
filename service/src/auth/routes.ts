@@ -36,6 +36,20 @@ export const createRoutes = (
     }
   })
 
+  router.post('/verify', async (req, res) => {
+    if (!req.query) {
+      res.sendStatus(400)
+      return
+    }
+
+    try {
+      await authService.verifyUser(req.query.token as string)
+      res.sendStatus(201)
+    } catch (e) {
+      res.sendStatus(400)
+    }
+  })
+
   router.get('/me', middleware.verifyToken, (req, res) => {
     // TODO
     res.send(200)

@@ -122,12 +122,14 @@ describe('Auth', () => {
           jwtService,
           repository
         )
-        expect(() =>
+
+        const run = () =>
           service.login(
             'someinvalidemail@invalid.com',
             validatePassword('32781903198989')
           )
-        ).rejects.toBeDefined()
+
+        expect(run()).rejects.toBeDefined()
       })
 
       it('can not login when password is invalid', async () => {
@@ -147,12 +149,13 @@ describe('Auth', () => {
         }
 
         const service = createService(passwordUtils, jwtService, repository)
-        expect(() =>
+        const run = () =>
           service.login(
             mockUser.email,
             validatePassword('somethingcompletelydifferent')
           )
-        ).rejects.toBeDefined()
+
+        expect(run()).rejects.toBeDefined()
       })
     })
   })

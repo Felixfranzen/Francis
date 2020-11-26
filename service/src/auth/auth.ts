@@ -1,5 +1,5 @@
+import * as crypto from 'crypto'
 import { Database } from '../database'
-import * as bcrypt from 'bcrypt'
 import { JwtUtils } from './jwt'
 import { Request, Response, NextFunction } from 'express'
 import { Password } from './password'
@@ -26,6 +26,9 @@ const getFullUserByEmail = async (
   return result[0]
 }
 
+// TODO Create a special user type that can only be generated
+// by running email/password through a create function that encrypts password etc
+
 const createUser = async (
   query: Database['query'],
   email: string,
@@ -41,11 +44,55 @@ const createUser = async (
   return userId
 }
 
+const createVerificationtoken = async (
+  query: Database['query'],
+  userId: string
+) => {
+  const verificationToken = crypto.randomBytes(16).toString('hex')
+
+  const result = await query
+    .table('verification_token')
+    .insert({ user_id: userId, token: verificationToken })
+    .returning('*')
+
+  // todo validate and fix :)))
+  return result[0].verification_token
+
+  // TODO remove old tokens
+}
+
+const verifyUser = async (query: Database['query'], token: string) => {
+  // 1 day
+  var expiry = new Date()
+  expiry.setDate(expiry.getDate() - 1)
+  console.log(expiry.toISOString())
+
+  // TODO check that created_at is within time limit
+  // TODO move to separate queries?
+  const result = await query
+    .select('*')
+    .from('verification_token')
+    .where({ token })
+    .andWhere('created_at', '>', expiry.toISOString())
+    .limit(1)
+
+  if (!result[0]) {
+    throw new Error('No valid token found')
+  }
+
+  // TODO VALIDATE
+  const userId = result[0].user_id
+  await query.table('user').where({ id: userId }).update({ is_verified: true })
+}
+
 export const createRepository = (query: Database['query']) => {
   return {
     getFullUserByEmail: (email: string) => getFullUserByEmail(query, email),
     createUser: (email: string, hashedPassword: string) =>
       createUser(query, email, hashedPassword),
+    createVerificationtoken: (userId: string) =>
+      createVerificationtoken(query, userId),
+    verifyUser: (token: string) => verifyUser(query, token),
   }
 }
 
@@ -63,9 +110,12 @@ export const createService = (
     const hashedPassword = await passwordUtils.encrypt(password)
     const userId = await repository.createUser(email, hashedPassword)
     const token = await jwtUtils.sign({ id: userId, email })
+    const verificationToken = await repository.createVerificationtoken(userId)
+
     return {
       email: email,
       id: userId,
+      verificationToken,
       token,
     }
   }
@@ -93,7 +143,9 @@ export const createService = (
     }
   }
 
-  return { signUp, login }
+  // TODO include userId in verifyUser to make sure that the right user is verified
+  // user id could be sent as a paramter in the email link
+  return { signUp, login, verifyUser: repository.verifyUser }
 }
 
 export type AuthService = ReturnType<typeof createService>
