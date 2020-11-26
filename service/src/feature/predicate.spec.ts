@@ -42,7 +42,7 @@ describe('Predicate', () => {
       isValid(1, {
         key: '',
         operator: 'INCLUDES',
-        value: [1,2,3],
+        value: [1, 2, 3],
       })
     ).toBe(true)
 
@@ -50,7 +50,7 @@ describe('Predicate', () => {
       isValid(99, {
         key: '',
         operator: 'INCLUDES',
-        value: [1,2,3],
+        value: [1, 2, 3],
       })
     ).toBe(false)
   })

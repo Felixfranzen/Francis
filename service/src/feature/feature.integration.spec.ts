@@ -8,7 +8,6 @@ import {
 import { createDatabase, Database } from '../database'
 import * as dotenv from 'dotenv'
 import { parseConfig } from '../config'
-import { Flag } from './flag'
 dotenv.config()
 
 describe('Feature', () => {

@@ -14,7 +14,10 @@ export const createRoutes = (
     }
 
     const result = await authService.signUp(req.body.email, req.body.password)
-    res.cookie('access_token', result.token, { maxAge: 900000, httpOnly: true })
+    res.cookie('access_token', result.token, {
+      maxAge: 900000,
+      httpOnly: true,
+    })
     res.send(200)
   })
 
