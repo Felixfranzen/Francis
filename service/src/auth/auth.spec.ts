@@ -2,7 +2,7 @@ import { createService } from './auth'
 import { AuthRepository } from './auth'
 import { JwtUtils } from './jwt'
 import * as uuid from 'uuid'
-import { Password, validatePassword } from './password'
+import { validatePassword } from './password'
 
 describe('Auth', () => {
   const emptyJwtUtils = {
@@ -37,6 +37,9 @@ describe('Auth', () => {
       const repository: AuthRepository = {
         ...emptyRepository,
         createUser: jest.fn().mockReturnValue(Promise.resolve(mockId)),
+        getFullUserByEmail: jest.fn(),
+        createVerificationToken: jest.fn(),
+        verifyUser: jest.fn(),
       }
 
       const service = createService(emptyPasswordUtils, jwtService, repository)
@@ -66,6 +69,9 @@ describe('Auth', () => {
       const repository: AuthRepository = {
         ...emptyRepository,
         createUser: mockCreateUser,
+        getFullUserByEmail: jest.fn(),
+        createVerificationToken: jest.fn(),
+        verifyUser: jest.fn(),
       }
       const service = createService(passwordUtils, jwtService, repository)
       await service.signUp(mockEmail, mockPassword)
@@ -96,6 +102,8 @@ describe('Auth', () => {
       const repository: AuthRepository = {
         ...emptyRepository,
         getFullUserByEmail: jest.fn().mockResolvedValue(mockUser),
+        createVerificationToken: jest.fn(),
+        verifyUser: jest.fn(),
       }
 
       const service = createService(passwordUtils, jwtService, repository)
@@ -120,6 +128,8 @@ describe('Auth', () => {
         const repository: AuthRepository = {
           ...emptyRepository,
           getFullUserByEmail: jest.fn().mockResolvedValue(mockUser),
+          createVerificationToken: jest.fn(),
+          verifyUser: jest.fn(),
         }
 
         const service = createService(
@@ -151,6 +161,8 @@ describe('Auth', () => {
         const repository: AuthRepository = {
           ...emptyRepository,
           getFullUserByEmail: jest.fn().mockResolvedValue(mockUser),
+          createVerificationToken: jest.fn(),
+          verifyUser: jest.fn(),
         }
 
         const service = createService(passwordUtils, emptyJwtUtils, repository)

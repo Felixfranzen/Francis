@@ -8,12 +8,16 @@
     "down": "docker-compose down",
     "start": "NODE_ENV=development ts-node-dev --inspect=127.0.0.1:9234 ./src",
     "test": "jest . --passWithNoTests",
-    "migrate:make": "knex migrate:make --migrations-directory ./src/migrations -x ts"
+    "migrate:make": "knex migrate:make --migrations-directory ./src/migrations -x ts",
+    "pgtyped:watch": "pgtyped -w -c pgtyped_config.json"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@pgtyped/cli": "^0.9.0",
+    "@pgtyped/query": "^0.9.0",
     "@types/cookie-parser": "^1.4.2",
+    "@types/pg": "^7.14.7",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.5",

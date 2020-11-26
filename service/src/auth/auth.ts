@@ -3,97 +3,66 @@ import { Database } from '../database'
 import { JwtUtils } from './jwt'
 import { Request, Response, NextFunction } from 'express'
 import { Password } from './password'
-
-type Role = 'user' | 'admin'
-
-const getFullUserByEmail = async (
-  query: Database['query'],
-  email: string
-): Promise<
-  | {
-      id: string
-      email: string
-      password: string
-      role: Role
-    }
-  | undefined
-> => {
-  const result = await query.select('*').from('user').where({ email }).limit(1)
-  if (!result) {
-    return
-  }
-
-  return result[0]
-}
-
-// TODO Create a special user type that can only be generated
-// by running email/password through a create function that encrypts password etc
-
-const createUser = async (
-  query: Database['query'],
-  email: string,
-  hashedPassword: string // TODO change signature
-) => {
-  const featureIds = await query
-    .table('user')
-    .insert({ email, password: hashedPassword, role: 'user' })
-    .returning('id')
-
-  // todo validate and fix :)))
-  const userId = featureIds[0] as string
-  return userId
-}
-
-const createVerificationtoken = async (
-  query: Database['query'],
-  userId: string
-) => {
-  const verificationToken = crypto.randomBytes(16).toString('hex')
-
-  const result = await query
-    .table('verification_token')
-    .insert({ user_id: userId, token: verificationToken })
-    .returning('*')
-
-  // todo validate and fix :)))
-  return result[0].verification_token
-
-  // TODO remove old tokens
-}
-
-const verifyUser = async (query: Database['query'], token: string) => {
-  // 1 day
-  var expiry = new Date()
-  expiry.setDate(expiry.getDate() - 1)
-  console.log(expiry.toISOString())
-
-  // TODO move to separate queries?
-  const result = await query
-    .select('*')
-    .from('verification_token')
-    .where({ token })
-    .andWhere('created_at', '>', expiry.toISOString())
-    .limit(1)
-
-  if (!result[0]) {
-    throw new Error('No valid token found')
-  }
-
-  // TODO VALIDATE RESULT
-  const userId = result[0].user_id
-
-  // TODO CRASH IF USER IS ALREADY VERIFIED
-  await query.table('user').where({ id: userId }).update({ is_verified: true })
-}
+import {
+  insertUser,
+  insertVerificationToken,
+  selectFullUserByEmail,
+  selectVerificationToken,
+  updateVerification,
+} from './queries/index.queries'
 
 export const createRepository = (query: Database['query']) => {
+  const getFullUserByEmail = async (email: string) => {
+    const result = await query(selectFullUserByEmail, { email })
+    if (!result[0]) {
+      throw new Error('No user found')
+    }
+    return result[0]
+  }
+
+  const createUser = async (
+    email: string,
+    hashedPassword: string,
+    role: 'user' | 'admin'
+  ) => {
+    const result = await query(insertUser, {
+      email,
+      password: hashedPassword,
+      role,
+    })
+    return result[0].id
+  }
+
+  const createVerificationToken = async (userId: string) => {
+    const token = crypto.randomBytes(16).toString('hex')
+    await query(insertVerificationToken, { userId, token: token })
+  }
+
+  const verifyUser = async (token: string) => {
+    const tokenData = await query(selectVerificationToken, { token })
+    if (!tokenData[0]) {
+      throw new Error('No matching token')
+    }
+    const { created_at, user_id } = tokenData[0]
+
+    // 1 day
+    const expiry = new Date()
+    expiry.setDate(expiry.getDate() - 1)
+    if (created_at < expiry) {
+      throw new Error('Token expired')
+    }
+
+    await query(updateVerification, {
+      userId: user_id,
+      verified: true,
+    })
+  }
+
   return {
-    getFullUserByEmail: (email: string) => getFullUserByEmail(query, email),
-    createUser: (email: string, hashedPassword: string) =>
-      createUser(query, email, hashedPassword),
-    createVerificationtoken: (userId: string) =>
-      createVerificationtoken(query, userId),
-    verifyUser: (token: string) => verifyUser(query, token),
+    getFullUserByEmail,
+    createUser,
+    createVerificationToken,
+    verifyUser,
   }
 }
 
@@ -109,9 +78,9 @@ export const createService = (
 ) => {
   const signUp = async (email: string, password: Password) => {
     const hashedPassword = await passwordUtils.encrypt(password)
-    const userId = await repository.createUser(email, hashedPassword)
+    const userId = await repository.createUser(email, hashedPassword, 'user')
+    const verificationToken = await repository.createVerificationToken(userId)
     const token = await jwtUtils.sign({ id: userId, email })
-    const verificationToken = await repository.createVerificationtoken(userId)
 
     return {
       email: email,
@@ -123,10 +92,6 @@ export const createService = (
 
   const login = async (email: string, password: Password) => {
     const user = await repository.getFullUserByEmail(email)
-    if (!user) {
-      throw new Error('User not found')
-    }
-
     const isCorrectPassword = await passwordUtils.isEqual(
       password,
       user.password
@@ -171,7 +136,7 @@ export const createAuthMiddleware = (jwtUtils: JwtUtils) => {
     }
   }
 
-  const verifyRole = (allowedRoles: Role[]) => async (
+  const verifyRole = (allowedRoles: ('user' | 'admin')[]) => async (
     req: Request,
     res: Response,
     next: NextFunction
