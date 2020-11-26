@@ -13,36 +13,47 @@ export const createRoutes = (
   // 1. get user_id from jwt token
   // 2. check if token.user_id is same as req.params.user_id
 
+  router.post(
+    '/feature',
+    authMiddleware.verifyRole(['admin']),
+    async (req, res) => {
+      if (!req.body) {
+        res.sendStatus(400)
+        return
+      }
 
-  router.post('/feature', async (req, res) => {
-    if (!req.body) {
-      res.sendStatus(400)
-      return
+      const result = await featureService.create(req.body)
+      res.send(result)
     }
+  )
 
-    const result = await featureService.create(req.body)
-    res.send(result)
-  })
+  router.delete(
+    '/feature/:id',
+    authMiddleware.verifyRole(['admin']),
+    async (req, res) => {
+      if (!req.params || !req.params.id) {
+        res.sendStatus(400)
+        return
+      }
 
-  router.delete('/feature/:id', async (req, res) => {
-    if (!req.params || !req.params.id) {
-      res.sendStatus(400)
-      return
+      await featureService.delete(req.params.id)
+      res.send(204)
     }
+  )
 
-    await featureService.delete(req.params.id)
-    res.send(204)
-  })
-
-  router.post('/feature/status', async (req, res) => {
-    if (!req.body || !req.body.feature_key || !req.body.params) {
-      res.sendStatus(400)
-      return
+  router.post(
+    '/feature/status',
+    authMiddleware.verifyToken,
+    async (req, res) => {
+      if (!req.body || !req.body.feature_key || !req.body.params) {
+        res.sendStatus(400)
+        return
+      }
+      const { feature_key, params } = req.body
+      const result = await featureService.getStatus(feature_key, params)
+      res.send(result)
     }
-    const { feature_key, params } = req.body
-    const result = await featureService.getStatus(feature_key, params)
-    res.send(result)
-  })
+  )
 
   return router
 }

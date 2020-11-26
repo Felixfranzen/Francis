@@ -67,7 +67,6 @@ const verifyUser = async (query: Database['query'], token: string) => {
   expiry.setDate(expiry.getDate() - 1)
   console.log(expiry.toISOString())
 
-  // TODO check that created_at is within time limit
   // TODO move to separate queries?
   const result = await query
     .select('*')
@@ -80,8 +79,10 @@ const verifyUser = async (query: Database['query'], token: string) => {
     throw new Error('No valid token found')
   }
 
-  // TODO VALIDATE
+  // TODO VALIDATE RESULT
   const userId = result[0].user_id
+
+  // TODO CRASH IF USER IS ALREADY VERIFIED
   await query.table('user').where({ id: userId }).update({ is_verified: true })
 }
 
