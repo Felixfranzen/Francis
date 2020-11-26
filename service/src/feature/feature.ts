@@ -1,5 +1,12 @@
 import { Database } from '../database'
 import { Flag, getMatchingFlags, getStatus } from './flag'
+import { Predicate } from './predicate'
+import {
+  createFeature,
+  createFlag,
+  deleteFeature,
+  getFlagsByFeatureKey,
+} from './queries/index.queries'
 
 export type Feature = {
   name: string
@@ -7,49 +14,32 @@ export type Feature = {
   flags: Flag[]
 }
 
-const createFeature = async (query: Database['query'], feature: Feature) => {
-  const featureIds = await query
-    .table('feature')
-    .insert({ name: feature.name, key: feature.key })
-    .returning('id')
-
-  // todo validate and fix :)))
-  const featureId = featureIds[0] as string
-
-  const flagsToInsert = feature.flags.map((flag) => ({
-    feature_id: featureId,
-    ...flag,
-    predicates: JSON.stringify(flag.predicates),
-  }))
-
-  await query.table('flag').insert(flagsToInsert)
-
-  return featureId
-}
-
-const deleteFeature = async (query: Database['query'], id: string) => {
-  await query.table('feature').delete().where({ id })
-}
-
-const getFlagsByFeatureKey = async (
-  query: Database['query'],
-  key: string
-): Promise<Flag[]> => {
-  const result = await query
-    .select('flag.name as name', 'enabled', 'predicates')
-    .from('feature')
-    .join('flag', 'flag.feature_id', 'feature.id')
-    .where('key', key)
-
-  // TODO VALIDATE THIS :))
-  return result as Flag[]
-}
-
 export const createRepository = (query: Database['query']) => {
   return {
-    getFlagsByFeatureKey: (key: string) => getFlagsByFeatureKey(query, key),
-    create: (feature: Feature) => createFeature(query, feature),
-    delete: (id: string) => deleteFeature(query, id),
+    getFlagsByFeatureKey: async (key: string) => {
+      const result = await query(getFlagsByFeatureKey, { key })
+      const flags: Flag[] = result.map((dbFlag) => ({
+        ...dbFlag,
+        predicates: dbFlag === null ? [] : (dbFlag.predicates as Predicate[]),
+      }))
+      return flags
+    },
+
+    create: async (feature: Feature) => {
+      const result = await query(createFeature, feature)
+      const featureId = result[0].id
+      const flagsToInsert = feature.flags.map((flag) => ({
+        ...flag,
+        featureId,
+        predicates: JSON.stringify(flag.predicates),
+      }))
+
+      await Promise.all(flagsToInsert.map((flag) => query(createFlag, flag)))
+      return featureId
+    },
+    delete: async (id: string) => {
+      await query(deleteFeature, { id })
+    },
   }
 }
 

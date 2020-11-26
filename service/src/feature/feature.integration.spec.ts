@@ -1,13 +1,8 @@
 import * as uuid from 'uuid'
-import {
-  createRepository,
-  createService,
-  Feature,
-  FeatureRepository,
-} from './feature'
+import { createRepository, Feature, FeatureRepository } from './feature'
 import { createDatabase, Database } from '../database'
-import * as dotenv from 'dotenv'
 import { parseConfig } from '../config'
+import * as dotenv from 'dotenv'
 dotenv.config()
 
 describe('Feature', () => {
@@ -27,7 +22,13 @@ describe('Feature', () => {
       const feature: Feature = {
         name: uuid.v4(),
         key: uuid.v4(),
-        flags: [],
+        flags: [
+          {
+            name: 'aabbcc',
+            enabled: true,
+            predicates: [{ key: 'a', operator: 'EQUALS', value: 'a' }],
+          },
+        ],
       }
 
       const result = await repository.create(feature)

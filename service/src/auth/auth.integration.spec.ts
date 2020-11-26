@@ -1,7 +1,12 @@
-import cookieParser = require('cookie-parser')
+import * as cookieParser from 'cookie-parser'
 import * as express from 'express'
 import * as supertest from 'supertest'
-import { createAuthMiddleware } from './auth'
+import { AuthRepository, createAuthMiddleware, createRepository } from './auth'
+import * as dotenv from 'dotenv'
+import { createDatabase, Database } from '../database'
+import { parseConfig } from '../config'
+import * as uuid from 'uuid'
+dotenv.config()
 
 const createApp = () => {
   const app = express()
@@ -11,8 +16,41 @@ const createApp = () => {
 
 describe('Auth', () => {
   describe('Repository', () => {
-    it('can get user by email', () => {})
-    it('can create a user', () => {})
+    let repository: AuthRepository
+    let db: Database
+    beforeAll(async () => {
+      db = await createDatabase(parseConfig(process.env))
+      await db.migrate()
+      repository = createRepository(db.query)
+    })
+    afterAll(async () => {
+      await db.disconnect()
+    })
+
+    it('can create a user', async () => {
+      const email = uuid.v4() + '@gmail.com'
+      const result = await repository.createUser(email, 'hashhash', 'user')
+      expect(result).toBeDefined()
+    })
+    it('can get user by email', async () => {
+      const email = uuid.v4() + '@gmail.com'
+      const mockUser = {
+        email,
+        password: 'hashhash',
+        role: 'user' as const,
+      }
+      const insertedId = await repository.createUser(
+        mockUser.email,
+        mockUser.password,
+        mockUser.role
+      )
+      expect(insertedId).toBeDefined()
+
+      const user = await repository.getFullUserByEmail(mockUser.email)
+      expect(user.email).toBe(mockUser.email)
+      expect(user.password).toBe(mockUser.password)
+      expect(user.role).toBe(mockUser.role)
+    })
   })
 
   describe('Middleware', () => {
