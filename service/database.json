@@ -1,0 +1,12 @@
+{
+  "sql-file": true,
+
+  "pg": {
+    "driver": "pg",
+    "user": { "ENV": "DB_USERNAME" },
+    "password": { "ENV": "DB_PASSWORD" },
+    "host": { "ENV": "DB_HOST" },
+    "database": { "ENV": "DB_NAME" },
+    "port": { "ENV": "DB_PORT" }
+  }
+}

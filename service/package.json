@@ -9,7 +9,10 @@
     "start": "NODE_ENV=development ts-node-dev --inspect=127.0.0.1:9234 ./src",
     "test": "jest . --passWithNoTests",
     "migrate:make": "knex migrate:make --migrations-directory ./src/migrations -x ts",
-    "pgtyped:watch": "pgtyped -w -c pgtyped_config.json"
+    "pgtyped:watch": "pgtyped -w -c pgtyped_config.json",
+    "db:migrate:create": "db-migrate create -e pg",
+    "db:migrate:up": "db-migrate up -e pg",
+    "db:migrate:down": "db-migrate down -e pg"
   },
   "author": "",
   "license": "ISC",
@@ -21,6 +24,8 @@
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "cookie-parser": "^1.4.5",
+    "db-migrate": "^0.11.11",
+    "db-migrate-pg": "^1.2.2",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
