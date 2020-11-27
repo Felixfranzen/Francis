@@ -16,9 +16,9 @@ describe('Feature', () => {
       repository = createRepository(db.query)
 
       const result = await db.query(insertUser, {
-        email: 'hello@felixfranzen.com',
+        email: uuid.v4() + '@felixfranzen.com',
         password: '1234567890',
-        role: 'user',
+        role: 'admin',
       })
       userId = result[0].id
     })

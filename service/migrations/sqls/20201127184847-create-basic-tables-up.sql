@@ -1,10 +1,12 @@
 BEGIN;
 
+CREATE TYPE user_role AS ENUM ('user', 'admin');
+
 CREATE TABLE IF NOT EXISTS user_account (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   email TEXT NOT NULL UNIQUE,
   password TEXT NOT NULL,
-  role TEXT NOT NULL,
+  role user_role NOT NULL,
   is_verified BOOL NOT NULL DEFAULT FALSE
 );
 

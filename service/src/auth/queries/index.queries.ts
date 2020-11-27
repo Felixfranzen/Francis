@@ -1,6 +1,8 @@
 /** Types generated for queries found in "src/auth/queries/index.sql" */
 import { PreparedQuery } from '@pgtyped/query';
 
+export type user_role = 'user' | 'admin';
+
 /** 'SelectFullUserByEmail' parameters type */
 export interface ISelectFullUserByEmailParams {
   email: string | null | void;
@@ -11,7 +13,7 @@ export interface ISelectFullUserByEmailResult {
   id: string;
   email: string;
   password: string;
-  role: string;
+  role: user_role;
   is_verified: boolean;
 }
 
@@ -36,7 +38,7 @@ export const selectFullUserByEmail = new PreparedQuery<ISelectFullUserByEmailPar
 export interface IInsertUserParams {
   email: string | null | void;
   password: string | null | void;
-  role: string | null | void;
+  role: user_role | null | void;
 }
 
 /** 'InsertUser' return type */
