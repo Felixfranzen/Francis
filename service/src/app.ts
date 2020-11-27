@@ -48,7 +48,6 @@ export const createApp = async (config: Config) => {
 
   return {
     start: async () => {
-      await database.migrate()
       app.listen(config.APP_PORT, () =>
         console.log(`Service started on port ${config.APP_PORT}!`)
       )

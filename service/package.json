@@ -7,7 +7,7 @@
     "up": "docker-compose up -d",
     "down": "docker-compose down",
     "start": "NODE_ENV=development ts-node-dev --inspect=127.0.0.1:9234 ./src",
-    "test": "jest . --passWithNoTests",
+    "test": "npm run db:migrate:up && jest . --passWithNoTests",
     "migrate:make": "knex migrate:make --migrations-directory ./src/migrations -x ts",
     "pgtyped:watch": "pgtyped -w -c pgtyped_config.json",
     "db:migrate:create": "db-migrate create -e pg",

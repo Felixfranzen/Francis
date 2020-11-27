@@ -9,6 +9,7 @@ import {
 } from './queries/index.queries'
 
 export type Feature = {
+  userId: string,
   name: string
   key: string
   flags: Flag[]

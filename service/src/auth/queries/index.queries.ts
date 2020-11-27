@@ -12,7 +12,7 @@ export interface ISelectFullUserByEmailResult {
   email: string;
   password: string;
   role: string;
-  is_verified: boolean | null;
+  is_verified: boolean;
 }
 
 /** 'SelectFullUserByEmail' query type */

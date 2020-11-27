@@ -20,7 +20,6 @@ describe('Auth', () => {
     let db: Database
     beforeAll(async () => {
       db = await createDatabase(parseConfig(process.env))
-      await db.migrate()
       repository = createRepository(db.query)
     })
     afterAll(async () => {

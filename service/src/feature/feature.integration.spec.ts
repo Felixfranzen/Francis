@@ -3,16 +3,24 @@ import { createRepository, Feature, FeatureRepository } from './feature'
 import { createDatabase, Database } from '../database'
 import { parseConfig } from '../config'
 import * as dotenv from 'dotenv'
+import { insertUser } from '../auth/queries/index.queries'
 dotenv.config()
 
 describe('Feature', () => {
   describe('Repository', () => {
     let repository: FeatureRepository
     let db: Database
+    let userId: string
     beforeAll(async () => {
       db = await createDatabase(parseConfig(process.env))
-      await db.migrate()
       repository = createRepository(db.query)
+
+      const result = await db.query(insertUser, {
+        email: 'hello@felixfranzen.com',
+        password: '1234567890',
+        role: 'user',
+      })
+      userId = result[0].id
     })
     afterAll(async () => {
       await db.disconnect()
@@ -20,6 +28,7 @@ describe('Feature', () => {
 
     it('can insert a feature', async () => {
       const feature: Feature = {
+        userId,
         name: uuid.v4(),
         key: uuid.v4(),
         flags: [
@@ -37,6 +46,7 @@ describe('Feature', () => {
 
     it('can delete a feature', async () => {
       const feature: Feature = {
+        userId,
         name: uuid.v4(),
         key: uuid.v4(),
         flags: [],

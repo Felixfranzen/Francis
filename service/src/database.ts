@@ -4,7 +4,6 @@ import { PreparedQuery } from '@pgtyped/query'
 
 export type Database = {
   isAlive: () => Promise<boolean>
-  migrate: () => Promise<void>
   disconnect: () => Promise<void>
   query: <T, U>(preparedQuery: PreparedQuery<T, U>, params: T) => Promise<U[]>
 }
@@ -41,7 +40,6 @@ export const createDatabase = async (dbConfig: Config): Promise<Database> => {
     }
   }
 
-  const migrate = async () => {}
   const disconnect = async () => {
     await pool.end()
   }
@@ -49,7 +47,6 @@ export const createDatabase = async (dbConfig: Config): Promise<Database> => {
   return {
     isAlive,
     disconnect,
-    migrate,
     query,
   }
 }

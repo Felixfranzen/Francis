@@ -1,5 +1,5 @@
 /* @name createFeature */
-INSERT INTO feature (name, key) VALUES (:name, :key) RETURNING ID;
+INSERT INTO feature (user_id, name, key) VALUES (:userId, :name, :key) RETURNING ID;
 
 /* @name createFlag */
 INSERT INTO flag (feature_id, name, enabled, predicates) VALUES (:featureId, :name, :enabled, :predicates) RETURNING ID;
