@@ -1,10 +1,11 @@
 FROM node:12.18.3
 
 WORKDIR /app
-ENV NODE_ENV=production
-# TODO only copy relevant files
-COPY . .
 
+COPY . .
 RUN npm install
+
+ENV NODE_ENV=production
 RUN npm run build
+
 CMD npm start

@@ -7,7 +7,7 @@
     "up": "docker-compose up -d",
     "down": "docker-compose down",
     "build": "tsc -p ./tsconfig.json",
-    "start": "NODE_ENV=development node ./dist/index.js",
+    "start": "node ./dist/index.js",
     "start:dev": "NODE_ENV=development ts-node-dev --inspect=127.0.0.1:9234 ./src",
     "test": "npm run db:migrate:up && jest . --passWithNoTests",
     "migrate:make": "knex migrate:make --migrations-directory ./src/migrations -x ts",
