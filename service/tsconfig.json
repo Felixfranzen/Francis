@@ -1,5 +1,10 @@
 {
   "compilerOptions": {
+    "allowJs": true,
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es2019",
     "outDir": "dist",
     "sourceMap": true,
     "strict": true,
