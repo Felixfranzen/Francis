@@ -99,9 +99,8 @@ export const createService = (
     const userId = await repository.createUser(email, hashedPassword, role)
 
     const verificationToken = await repository.createVerificationToken(userId)
-
-    const tokenContent: JwtContent = { userId, role }
-    const token = await jwtUtils.sign(tokenContent)
+    const content: JwtContent = { userId, role }
+    const token = await jwtUtils.sign(content)
 
     return {
       email: email,
@@ -122,11 +121,34 @@ export const createService = (
       throw new Error('Invalid username/password')
     }
 
-    const token = await jwtUtils.sign({ id: user.id, email })
+    const content: JwtContent = { userId: user.id, role: user.role }
+    const token = await jwtUtils.sign(content)
     return {
       email: user.email,
       id: user.id,
       token,
+    }
+  }
+
+  const isValidToken = (decodedToken: unknown): decodedToken is JwtContent => {
+    try {
+      const content = decodedToken as any
+      return (
+        content &&
+        typeof content.userId === 'string' &&
+        (content.role === 'admin' || content.role === 'user')
+      )
+    } catch (e) {
+      return false
+    }
+  }
+
+  const parseToken = async (token: string) => {
+    const decoded = await jwtUtils.verifyAndDecode(token)
+    if (isValidToken(decoded)) {
+      return decoded
+    } else {
+      throw new Error('Not a valid token')
     }
   }
 
@@ -137,12 +159,15 @@ export const createService = (
     login,
     verifyUser: repository.verifyUser,
     getUserById: repository.getUserById,
+    parseToken,
   }
 }
 
 export type AuthService = ReturnType<typeof createService>
 
-export const createAuthMiddleware = (jwtUtils: JwtUtils) => {
+export const createAuthMiddleware = (
+  parseToken: (token: string) => Promise<JwtContent>
+) => {
   const verifyToken = async (
     req: Request,
     res: Response,
@@ -155,7 +180,7 @@ export const createAuthMiddleware = (jwtUtils: JwtUtils) => {
         return
       }
 
-      await jwtUtils.verifyAndDecode(jwt)
+      await parseToken(jwt)
       next()
     } catch (e) {
       res.sendStatus(401)
@@ -174,10 +199,8 @@ export const createAuthMiddleware = (jwtUtils: JwtUtils) => {
         return
       }
 
-      // TODO validate properly
-      const decodedToken = (await jwtUtils.verifyAndDecode(jwt)) as any
-      const isAllowed =
-        decodedToken.role && allowedRoles.includes(decodedToken.role)
+      const decodedToken = await parseToken(jwt)
+      const isAllowed = allowedRoles.includes(decodedToken.role)
 
       if (!isAllowed) {
         res.sendStatus(403)

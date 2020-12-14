@@ -36,15 +36,17 @@ export const createApp = async (config: Config) => {
     authRepository
   )
 
-  const authMiddleware = createAuthMiddleware(jwtUtils)
+  const authMiddleware = createAuthMiddleware(authService.parseToken)
 
   app.use(morgan('tiny'))
   app.use(bodyParser.json())
   app.use(cookieParser())
   app.use(bodyParser.urlencoded({ extended: false }))
 
-  app.use(createFeatureRoutes(authMiddleware, featureService))
-  app.use(createAuthRoutes(authMiddleware, authService, jwtUtils))
+  app.use(createAuthRoutes(authMiddleware, authService))
+  app.use(
+    createFeatureRoutes(authMiddleware, featureService, authService.parseToken)
+  )
 
   return {
     start: async () => {

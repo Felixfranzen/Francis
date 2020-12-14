@@ -1,17 +1,13 @@
-import { Router } from 'express'
+import { NextFunction, Router, Request, Response } from 'express'
 import { AuthMiddleware } from '../auth/auth'
 import { FeatureService } from './feature'
 
 export const createRoutes = (
   authMiddleware: AuthMiddleware,
-  featureService: FeatureService
+  featureService: FeatureService,
+  parseToken: (token: string) => Promise<{ userId: string }>
 ) => {
   const router = Router()
-  // router.use(authMiddleware.verifyToken)
-  // router.use(authMiddleware.verifyFeatureAccess())
-  // verifyUseraccess = (req) =>
-  // 1. get user_id from jwt token
-  // 2. check if token.user_id is same as req.params.user_id
 
   router.post(
     '/feature',
@@ -22,7 +18,8 @@ export const createRoutes = (
         return
       }
 
-      const result = await featureService.create(req.body)
+      const { userId } = await parseToken(req.cookies.access_token)
+      const result = await featureService.create({ userId, ...req.body })
       res.send(result)
     }
   )
@@ -36,12 +33,22 @@ export const createRoutes = (
         return
       }
 
+      const { userId } = await parseToken(req.cookies.access_token)
+      const userHasFeature = await featureService.userHasFeature(
+        userId,
+        req.params.id
+      )
+      if (!userHasFeature) {
+        res.sendStatus(403)
+        return
+      }
+
       await featureService.delete(req.params.id)
       res.send(204)
     }
   )
 
-  router.post(
+  router.get(
     '/feature/status',
     authMiddleware.verifyToken,
     async (req, res) => {
@@ -54,6 +61,12 @@ export const createRoutes = (
       res.send(result)
     }
   )
+
+  router.get('/feature', authMiddleware.verifyToken, async (req, res) => {
+    const { userId } = await parseToken(req.cookies.access_token)
+    const result = await featureService.getFeaturesByUserId(userId)
+    res.status(200).send(result)
+  })
 
   return router
 }

@@ -1,11 +1,9 @@
 import { Router } from 'express'
 import { AuthMiddleware, AuthService } from './auth'
-import { JwtUtils } from './jwt-utils'
 
 export const createRoutes = (
   middleware: AuthMiddleware,
   authService: AuthService,
-  jwtUtils: JwtUtils
 ) => {
   const router = Router()
 
@@ -16,6 +14,7 @@ export const createRoutes = (
     }
 
     const result = await authService.signUp(req.body.email, req.body.password)
+    // todo send verification token
     res.cookie('access_token', result.token, {
       maxAge: 900000,
       httpOnly: true,
@@ -56,10 +55,7 @@ export const createRoutes = (
   })
 
   router.get('/me', middleware.verifyToken, async (req, res) => {
-    // TODO VERIFY
-    const { userId } = (await jwtUtils.verifyAndDecode(
-      req.cookies.access_token
-    )) as any
+    const { userId } = await authService.parseToken(req.cookies.access_token)
 
     const result = await authService.getUserById(userId)
     res.status(200).send(result)

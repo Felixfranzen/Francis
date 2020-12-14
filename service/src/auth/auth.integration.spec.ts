@@ -4,7 +4,7 @@ import dotenv from 'dotenv'
 import { createDatabase, Database } from '../database'
 import { parseConfig } from '../config'
 import * as uuid from 'uuid'
-import { createApp } from '../test-utils'
+import { createMockApp } from '../test-utils'
 dotenv.config()
 
 describe('Auth', () => {
@@ -50,9 +50,8 @@ describe('Auth', () => {
 
   describe('Middleware', () => {
     it('sends 401 if no access token found in cookie', async () => {
-      const jwtUtls = { sign: jest.fn(), verifyAndDecode: jest.fn() }
-      const middleware = createAuthMiddleware(jwtUtls)
-      const app = createApp()
+      const middleware = createAuthMiddleware(jest.fn())
+      const app = createMockApp()
       app.get('/', middleware.verifyToken, (_, res) => {
         res.sendStatus(200)
       })
@@ -61,12 +60,10 @@ describe('Auth', () => {
     })
 
     it('sends 401 if unable to verify access token', async () => {
-      const jwtUtls = {
-        sign: jest.fn(),
-        verifyAndDecode: jest.fn().mockRejectedValue(new Error('failed')),
-      }
-      const middleware = createAuthMiddleware(jwtUtls)
-      const app = createApp()
+      const middleware = createAuthMiddleware(
+        jest.fn().mockRejectedValue(new Error('failed'))
+      )
+      const app = createMockApp()
       app.get('/', middleware.verifyToken, (_, res) => {
         res.sendStatus(200)
       })
@@ -78,12 +75,8 @@ describe('Auth', () => {
     })
 
     it('allows an authed request to access the route', async () => {
-      const jwtUtls = {
-        sign: jest.fn(),
-        verifyAndDecode: jest.fn().mockResolvedValue({}),
-      }
-      const middleware = createAuthMiddleware(jwtUtls)
-      const app = createApp()
+      const middleware = createAuthMiddleware(jest.fn().mockResolvedValue({}))
+      const app = createMockApp()
       app.get('/', middleware.verifyToken, (_, res) => {
         res.sendStatus(200)
       })
@@ -95,12 +88,10 @@ describe('Auth', () => {
     })
 
     it('sends 403 if a valid access token contains an invalid role', async () => {
-      const jwtUtls = {
-        sign: jest.fn(),
-        verifyAndDecode: jest.fn().mockRejectedValue({ role: 'user' }),
-      }
-      const middleware = createAuthMiddleware(jwtUtls)
-      const app = createApp()
+      const middleware = createAuthMiddleware(
+        jest.fn().mockRejectedValue({ role: 'user' })
+      )
+      const app = createMockApp()
       app.get('/', middleware.verifyRole(['admin']), (_, res) => {
         res.sendStatus(200)
       })
@@ -113,12 +104,10 @@ describe('Auth', () => {
 
     it('allows an authed request with the right role to access the route', async () => {
       const mockRole = 'admin' as const
-      const jwtUtls = {
-        sign: jest.fn(),
-        verifyAndDecode: jest.fn().mockResolvedValue({ role: mockRole }),
-      }
-      const middleware = createAuthMiddleware(jwtUtls)
-      const app = createApp()
+      const middleware = createAuthMiddleware(
+        jest.fn().mockResolvedValue({ role: mockRole })
+      )
+      const app = createMockApp()
       app.get('/', middleware.verifyRole([mockRole]), (_, res) => {
         res.sendStatus(200)
       })

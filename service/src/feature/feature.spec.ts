@@ -12,6 +12,7 @@ describe('Feature', () => {
       getFlagsByFeatureKey: jest
         .fn()
         .mockReturnValue(Promise.resolve(mockFlags)),
+      getFeaturesByUserId: jest.fn(),
       create: jest.fn(),
       delete: jest.fn(),
     }
