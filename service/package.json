@@ -11,6 +11,7 @@
     "start:dev": "npm run up && npm run db:migrate:up:dev && NODE_ENV=development ts-node-dev --inspect=127.0.0.1:9234 ./src",
     "test": "npm run up && npm run db:migrate:up:dev && jest . --passWithNoTests && npm run down",
     "pgtyped:watch": "pgtyped -w -c pgtyped_config.json",
+
     "db:migrate:create": "db-migrate create -e pg",
     "db:migrate:up:dev": "db-migrate up -e dev",
     "db:migrate:down:dev": "db-migrate down -e dev",
