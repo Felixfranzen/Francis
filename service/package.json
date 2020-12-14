@@ -9,7 +9,7 @@
     "build": "tsc -p ./tsconfig.json",
     "start": "node ./dist/index.js",
     "start:dev": "NODE_ENV=development ts-node-dev --inspect=127.0.0.1:9234 ./src",
-    "test": "npm run up && npm run db:migrate:up:dev && jest . --passWithNoTests && npm run down",
+    "test": "npm run up && sleep 5 && npm run db:migrate:up:dev && jest . --passWithNoTests && npm run down",
     "pgtyped:watch": "pgtyped -w -c pgtyped_config.json",
 
     "db:migrate:create": "db-migrate create -e pg",
