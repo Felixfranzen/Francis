@@ -6,7 +6,9 @@
   "scripts": {
     "up": "docker-compose up -d",
     "down": "docker-compose down",
-    "start": "NODE_ENV=development ts-node-dev --inspect=127.0.0.1:9234 ./src",
+    "build": "tsc -p ./tsconfig.json",
+    "start": "node ./dist/index.js",
+    "start:dev": "NODE_ENV=development ts-node-dev --inspect=127.0.0.1:9234 ./src",
     "test": "npm run db:migrate:up && jest . --passWithNoTests",
     "migrate:make": "knex migrate:make --migrations-directory ./src/migrations -x ts",
     "pgtyped:watch": "pgtyped -w -c pgtyped_config.json",
@@ -39,7 +41,6 @@
     "@types/express": "^4.17.9",
     "@types/jest": "^26.0.15",
     "@types/jsonwebtoken": "^8.5.0",
-    "@types/knex": "^0.16.1",
     "@types/morgan": "^1.9.2",
     "@types/supertest": "^2.0.10",
     "@types/uuid": "^8.3.0",

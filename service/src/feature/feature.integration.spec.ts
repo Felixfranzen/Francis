@@ -2,7 +2,7 @@ import * as uuid from 'uuid'
 import { createRepository, Feature, FeatureRepository } from './feature'
 import { createDatabase, Database } from '../database'
 import { parseConfig } from '../config'
-import * as dotenv from 'dotenv'
+import dotenv from 'dotenv'
 import { insertUser } from '../auth/queries/index.queries'
 dotenv.config()
 
