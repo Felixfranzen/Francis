@@ -1,7 +1,16 @@
 {
   "sql-file": true,
 
-  "pg": {
+  "dev": {
+    "driver": "pg",
+    "host": "localhost",
+    "user": "francis",
+    "password": "francis",
+    "database": "francis",
+    "port": 5432
+  },
+
+  "prod": {
     "driver": "pg",
     "user": { "ENV": "DB_USERNAME" },
     "password": { "ENV": "DB_PASSWORD" },
