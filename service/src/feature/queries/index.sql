@@ -7,7 +7,13 @@ INSERT INTO flag (feature_id, name, enabled, predicates) VALUES (:featureId, :na
 /* @name deleteFeature */
 DELETE FROM feature WHERE id = :id;
 
-/* @name getFlagsByFeatureKey */
+/* @name selectFlagsByFeatureKey */
 SELECT flag.name as name, enabled, predicates
 FROM feature
-JOIN flag ON flag.feature_id = feature.id WHERE key = :key;
+JOIN flag ON flag.feature_id = feature.id
+WHERE key = :key;
+
+/* @name selectFeaturesByUserId */
+SELECT *
+FROM feature
+WHERE user_id = :userId;

@@ -3,7 +3,7 @@ import { AuthMiddleware, AuthService } from './auth'
 
 export const createRoutes = (
   middleware: AuthMiddleware,
-  authService: AuthService
+  authService: AuthService,
 ) => {
   const router = Router()
 
@@ -14,6 +14,7 @@ export const createRoutes = (
     }
 
     const result = await authService.signUp(req.body.email, req.body.password)
+    // todo send verification token
     res.cookie('access_token', result.token, {
       maxAge: 900000,
       httpOnly: true,
@@ -53,9 +54,11 @@ export const createRoutes = (
     }
   })
 
-  router.get('/me', middleware.verifyToken, (req, res) => {
-    // TODO
-    res.send(200)
+  router.get('/me', middleware.verifyToken, async (req, res) => {
+    const { userId } = await authService.parseToken(req.cookies.access_token)
+
+    const result = await authService.getUserById(userId)
+    res.status(200).send(result)
   })
 
   return router

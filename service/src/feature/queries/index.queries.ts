@@ -87,34 +87,67 @@ const deleteFeatureIR: any = {"name":"deleteFeature","params":[{"name":"id","tra
 export const deleteFeature = new PreparedQuery<IDeleteFeatureParams,IDeleteFeatureResult>(deleteFeatureIR);
 
 
-/** 'GetFlagsByFeatureKey' parameters type */
-export interface IGetFlagsByFeatureKeyParams {
+/** 'SelectFlagsByFeatureKey' parameters type */
+export interface ISelectFlagsByFeatureKeyParams {
   key: string | null | void;
 }
 
-/** 'GetFlagsByFeatureKey' return type */
-export interface IGetFlagsByFeatureKeyResult {
+/** 'SelectFlagsByFeatureKey' return type */
+export interface ISelectFlagsByFeatureKeyResult {
   name: string;
   enabled: boolean;
   predicates: Json;
 }
 
-/** 'GetFlagsByFeatureKey' query type */
-export interface IGetFlagsByFeatureKeyQuery {
-  params: IGetFlagsByFeatureKeyParams;
-  result: IGetFlagsByFeatureKeyResult;
+/** 'SelectFlagsByFeatureKey' query type */
+export interface ISelectFlagsByFeatureKeyQuery {
+  params: ISelectFlagsByFeatureKeyParams;
+  result: ISelectFlagsByFeatureKeyResult;
 }
 
-const getFlagsByFeatureKeyIR: any = {"name":"getFlagsByFeatureKey","params":[{"name":"key","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":467,"b":469,"line":13,"col":55}]}}],"usedParamSet":{"key":true},"statement":{"body":"SELECT flag.name as name, enabled, predicates\nFROM feature\nJOIN flag ON flag.feature_id = feature.id WHERE key = :key","loc":{"a":353,"b":469,"line":11,"col":0}}};
+const selectFlagsByFeatureKeyIR: any = {"name":"selectFlagsByFeatureKey","params":[{"name":"key","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":470,"b":472,"line":14,"col":13}]}}],"usedParamSet":{"key":true},"statement":{"body":"SELECT flag.name as name, enabled, predicates\nFROM feature\nJOIN flag ON flag.feature_id = feature.id\nWHERE key = :key","loc":{"a":356,"b":472,"line":11,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
  * SELECT flag.name as name, enabled, predicates
  * FROM feature
- * JOIN flag ON flag.feature_id = feature.id WHERE key = :key
+ * JOIN flag ON flag.feature_id = feature.id
+ * WHERE key = :key
  * ```
  */
-export const getFlagsByFeatureKey = new PreparedQuery<IGetFlagsByFeatureKeyParams,IGetFlagsByFeatureKeyResult>(getFlagsByFeatureKeyIR);
+export const selectFlagsByFeatureKey = new PreparedQuery<ISelectFlagsByFeatureKeyParams,ISelectFlagsByFeatureKeyResult>(selectFlagsByFeatureKeyIR);
+
+
+/** 'SelectFeaturesByUserId' parameters type */
+export interface ISelectFeaturesByUserIdParams {
+  userId: string | null | void;
+}
+
+/** 'SelectFeaturesByUserId' return type */
+export interface ISelectFeaturesByUserIdResult {
+  id: string;
+  user_id: string;
+  name: string;
+  key: string;
+}
+
+/** 'SelectFeaturesByUserId' query type */
+export interface ISelectFeaturesByUserIdQuery {
+  params: ISelectFeaturesByUserIdParams;
+  result: ISelectFeaturesByUserIdResult;
+}
+
+const selectFeaturesByUserIdIR: any = {"name":"selectFeaturesByUserId","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":550,"b":555,"line":19,"col":17}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT *\nFROM feature\nWHERE user_id = :userId","loc":{"a":511,"b":555,"line":17,"col":0}}};
+
+/**
+ * Query generated from SQL:
+ * ```
+ * SELECT *
+ * FROM feature
+ * WHERE user_id = :userId
+ * ```
+ */
+export const selectFeaturesByUserId = new PreparedQuery<ISelectFeaturesByUserIdParams,ISelectFeaturesByUserIdResult>(selectFeaturesByUserIdIR);
 
 

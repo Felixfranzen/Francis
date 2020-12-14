@@ -1,15 +1,21 @@
 import * as crypto from 'crypto'
 import { Database } from '../database'
-import { JwtUtils } from './jwt'
+import { JwtUtils } from './jwt-utils'
 import { Request, Response, NextFunction } from 'express'
 import { Password } from './password'
 import {
   insertUser,
   insertVerificationToken,
   selectFullUserByEmail,
+  selectUserById,
   selectVerificationToken,
   updateVerification,
 } from './queries/index.queries'
+
+type JwtContent = {
+  userId: string
+  role: 'user' | 'admin'
+}
 
 export const createRepository = (query: Database['query']) => {
   const getFullUserByEmail = async (email: string) => {
@@ -59,11 +65,21 @@ export const createRepository = (query: Database['query']) => {
     })
   }
 
+  const getUserById = async (userId: string) => {
+    const result = await query(selectUserById, { userId })
+    if (result.length === 0) {
+      throw new Error('User not found')
+    }
+
+    return result[0]
+  }
+
   return {
     getFullUserByEmail,
     createUser,
     createVerificationToken,
     verifyUser,
+    getUserById,
   }
 }
 
@@ -78,10 +94,13 @@ export const createService = (
   repository: AuthRepository
 ) => {
   const signUp = async (email: string, password: Password) => {
+    const role = 'user'
     const hashedPassword = await passwordUtils.encrypt(password)
-    const userId = await repository.createUser(email, hashedPassword, 'user')
+    const userId = await repository.createUser(email, hashedPassword, role)
+
     const verificationToken = await repository.createVerificationToken(userId)
-    const token = await jwtUtils.sign({ id: userId, email })
+    const content: JwtContent = { userId, role }
+    const token = await jwtUtils.sign(content)
 
     return {
       email: email,
@@ -102,7 +121,8 @@ export const createService = (
       throw new Error('Invalid username/password')
     }
 
-    const token = await jwtUtils.sign({ id: user.id, email })
+    const content: JwtContent = { userId: user.id, role: user.role }
+    const token = await jwtUtils.sign(content)
     return {
       email: user.email,
       id: user.id,
@@ -110,14 +130,44 @@ export const createService = (
     }
   }
 
+  const isValidToken = (decodedToken: unknown): decodedToken is JwtContent => {
+    try {
+      const content = decodedToken as any
+      return (
+        content &&
+        typeof content.userId === 'string' &&
+        (content.role === 'admin' || content.role === 'user')
+      )
+    } catch (e) {
+      return false
+    }
+  }
+
+  const parseToken = async (token: string) => {
+    const decoded = await jwtUtils.verifyAndDecode(token)
+    if (isValidToken(decoded)) {
+      return decoded
+    } else {
+      throw new Error('Not a valid token')
+    }
+  }
+
   // TODO include userId in verifyUser to make sure that the right user is verified
   // user id could be sent as a paramter in the email link
-  return { signUp, login, verifyUser: repository.verifyUser }
+  return {
+    signUp,
+    login,
+    verifyUser: repository.verifyUser,
+    getUserById: repository.getUserById,
+    parseToken,
+  }
 }
 
 export type AuthService = ReturnType<typeof createService>
 
-export const createAuthMiddleware = (jwtUtils: JwtUtils) => {
+export const createAuthMiddleware = (
+  parseToken: (token: string) => Promise<JwtContent>
+) => {
   const verifyToken = async (
     req: Request,
     res: Response,
@@ -130,7 +180,7 @@ export const createAuthMiddleware = (jwtUtils: JwtUtils) => {
         return
       }
 
-      await jwtUtils.verifyAndDecode(jwt)
+      await parseToken(jwt)
       next()
     } catch (e) {
       res.sendStatus(401)
@@ -149,10 +199,8 @@ export const createAuthMiddleware = (jwtUtils: JwtUtils) => {
         return
       }
 
-      // TODO validate properly
-      const decodedToken = (await jwtUtils.verifyAndDecode(jwt)) as any
-      const isAllowed =
-        decodedToken.role && allowedRoles.includes(decodedToken.role)
+      const decodedToken = await parseToken(jwt)
+      const isAllowed = allowedRoles.includes(decodedToken.role)
 
       if (!isAllowed) {
         res.sendStatus(403)
