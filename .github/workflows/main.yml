@@ -28,6 +28,6 @@ jobs:
       working-directory: ./service
       run: |
         npm ci
-        docker-compose up
+        docker-compose up -d
         npm test
         docker-compose down
