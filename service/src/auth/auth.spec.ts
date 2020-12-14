@@ -1,6 +1,6 @@
 import { createService } from './auth'
 import { AuthRepository } from './auth'
-import { JwtUtils } from './jwt'
+import { JwtUtils } from './jwt-utils'
 import * as uuid from 'uuid'
 import { validatePassword } from './password'
 
@@ -20,6 +20,7 @@ describe('Auth', () => {
     createUser: jest.fn(),
     createVerificationtoken: jest.fn(),
     verifyUser: jest.fn(),
+    getUserById: jest.fn(),
   }
 
   describe('Service', () => {

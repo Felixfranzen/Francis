@@ -17,7 +17,7 @@ import {
 } from './auth/auth'
 import { encrypt, isEqual } from './auth/password'
 
-import { createUtils as createJwtUtils } from './auth/jwt'
+import { createUtils as createJwtUtils } from './auth/jwt-utils'
 
 export const createApp = async (config: Config) => {
   const app = express()
@@ -44,7 +44,7 @@ export const createApp = async (config: Config) => {
   app.use(bodyParser.urlencoded({ extended: false }))
 
   app.use(createFeatureRoutes(authMiddleware, featureService))
-  app.use(createAuthRoutes(authMiddleware, authService))
+  app.use(createAuthRoutes(authMiddleware, authService, jwtUtils))
 
   return {
     start: async () => {

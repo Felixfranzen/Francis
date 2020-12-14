@@ -1,9 +1,11 @@
 import { Router } from 'express'
 import { AuthMiddleware, AuthService } from './auth'
+import { JwtUtils } from './jwt-utils'
 
 export const createRoutes = (
   middleware: AuthMiddleware,
-  authService: AuthService
+  authService: AuthService,
+  jwtUtils: JwtUtils
 ) => {
   const router = Router()
 
@@ -53,9 +55,14 @@ export const createRoutes = (
     }
   })
 
-  router.get('/me', middleware.verifyToken, (req, res) => {
-    // TODO
-    res.send(200)
+  router.get('/me', middleware.verifyToken, async (req, res) => {
+    // TODO VERIFY
+    const { userId } = (await jwtUtils.verifyAndDecode(
+      req.cookies.access_token
+    )) as any
+
+    const result = await authService.getUserById(userId)
+    res.status(200).send(result)
   })
 
   return router

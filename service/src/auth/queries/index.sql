@@ -1,6 +1,9 @@
 /* @name selectFullUserByEmail */
 SELECT * FROM user_account WHERE email = :email LIMIT 1;
 
+/* @name selectUserById */
+SELECT email, role, is_verified FROM user_account WHERE id = :userId;
+
 /* @name insertUser */
 INSERT INTO user_account (email, password, role) VALUES (:email, :password, :role) RETURNING id;
 

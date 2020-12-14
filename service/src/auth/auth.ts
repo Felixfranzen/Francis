@@ -1,15 +1,21 @@
 import * as crypto from 'crypto'
 import { Database } from '../database'
-import { JwtUtils } from './jwt'
+import { JwtUtils } from './jwt-utils'
 import { Request, Response, NextFunction } from 'express'
 import { Password } from './password'
 import {
   insertUser,
   insertVerificationToken,
   selectFullUserByEmail,
+  selectUserById,
   selectVerificationToken,
   updateVerification,
 } from './queries/index.queries'
+
+type JwtContent = {
+  userId: string
+  role: 'user' | 'admin'
+}
 
 export const createRepository = (query: Database['query']) => {
   const getFullUserByEmail = async (email: string) => {
@@ -59,11 +65,21 @@ export const createRepository = (query: Database['query']) => {
     })
   }
 
+  const getUserById = async (userId: string) => {
+    const result = await query(selectUserById, { userId })
+    if (result.length === 0) {
+      throw new Error('User not found')
+    }
+
+    return result[0]
+  }
+
   return {
     getFullUserByEmail,
     createUser,
     createVerificationToken,
     verifyUser,
+    getUserById,
   }
 }
 
@@ -78,10 +94,14 @@ export const createService = (
   repository: AuthRepository
 ) => {
   const signUp = async (email: string, password: Password) => {
+    const role = 'user'
     const hashedPassword = await passwordUtils.encrypt(password)
-    const userId = await repository.createUser(email, hashedPassword, 'user')
+    const userId = await repository.createUser(email, hashedPassword, role)
+
     const verificationToken = await repository.createVerificationToken(userId)
-    const token = await jwtUtils.sign({ id: userId, email })
+
+    const tokenContent: JwtContent = { userId, role }
+    const token = await jwtUtils.sign(tokenContent)
 
     return {
       email: email,
@@ -112,7 +132,12 @@ export const createService = (
 
   // TODO include userId in verifyUser to make sure that the right user is verified
   // user id could be sent as a paramter in the email link
-  return { signUp, login, verifyUser: repository.verifyUser }
+  return {
+    signUp,
+    login,
+    verifyUser: repository.verifyUser,
+    getUserById: repository.getUserById,
+  }
 }
 
 export type AuthService = ReturnType<typeof createService>

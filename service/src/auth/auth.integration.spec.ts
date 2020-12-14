@@ -1,18 +1,11 @@
-import cookieParser from 'cookie-parser'
-import express from 'express'
 import supertest from 'supertest'
 import { AuthRepository, createAuthMiddleware, createRepository } from './auth'
 import dotenv from 'dotenv'
 import { createDatabase, Database } from '../database'
 import { parseConfig } from '../config'
 import * as uuid from 'uuid'
+import { createApp } from '../test-utils'
 dotenv.config()
-
-const createApp = () => {
-  const app = express()
-  app.use(cookieParser())
-  return app
-}
 
 describe('Auth', () => {
   describe('Repository', () => {
