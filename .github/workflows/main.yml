@@ -27,5 +27,4 @@ jobs:
         working-directory: ./service
         run: |
           npm ci
-          docker ps
           npm test
