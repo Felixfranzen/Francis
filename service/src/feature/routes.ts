@@ -48,7 +48,7 @@ export const createRoutes = (
     }
   )
 
-  router.get(
+  router.post(
     '/feature/status',
     authMiddleware.verifyToken,
     async (req, res) => {
