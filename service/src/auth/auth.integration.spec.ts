@@ -24,6 +24,7 @@ describe('Auth', () => {
       const result = await repository.createUser(email, 'hashhash', 'user')
       expect(result).toBeDefined()
     })
+
     it('can get user by email', async () => {
       const email = uuid.v4() + '@gmail.com'
       const mockUser = {
@@ -44,8 +45,51 @@ describe('Auth', () => {
       expect(user?.role).toBe(mockUser.role)
     })
 
-    it('can create a token', () => {})
-    it('can verify a token and user', () => {})
+    it('can assign and get token', async () => {
+      const mockUser = {
+        email: uuid.v4() + '@gmail.com',
+        password: 'hashhash',
+        role: 'user' as const,
+      }
+      const userId = await repository.createUser(
+        mockUser.email,
+        mockUser.password,
+        mockUser.role
+      )
+      expect(userId).toBeDefined()
+      const mockVerificationToken = uuid.v4()
+      const token = await repository.assignVerificationToken(
+        mockVerificationToken,
+        userId
+      )
+      expect(token).toBeDefined()
+
+      const result = await repository.getVerificationTokenData(token)
+      expect(result).toBeDefined()
+      expect(result?.token).toBe(token)
+      expect(result?.user_id).toBe(userId)
+    })
+
+    it('can set user verification status', async () => {
+      const mockUser = {
+        email: uuid.v4() + '@gmail.com',
+        password: 'hashhash',
+        role: 'user' as const,
+      }
+      const userId = await repository.createUser(
+        mockUser.email,
+        mockUser.password,
+        mockUser.role
+      )
+
+      const before = await repository.getUserById(userId)
+      expect(before?.is_verified).toBe(false)
+
+      await repository.setUserVerification(userId, true)
+
+      const after = await repository.getUserById(userId)
+      expect(after?.is_verified).toBe(true)
+    })
   })
 
   describe('Middleware', () => {

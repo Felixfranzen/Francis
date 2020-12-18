@@ -5,7 +5,7 @@ import * as uuid from 'uuid'
 import { validatePassword } from './password'
 
 describe('Auth', () => {
-  const emptyJwtUtils = {
+  const emptyJwtUtils: JwtUtils = {
     verifyAndDecode: jest.fn(),
     sign: jest.fn(),
   }
@@ -15,11 +15,12 @@ describe('Auth', () => {
     isEqual: jest.fn(),
   }
 
-  const emptyRepository = {
+  const emptyRepository: AuthRepository = {
     getFullUserByEmail: jest.fn(),
     createUser: jest.fn(),
-    createVerificationtoken: jest.fn(),
-    verifyUser: jest.fn(),
+    assignVerificationToken: jest.fn(),
+    setUserVerification: jest.fn(),
+    getVerificationTokenData: jest.fn(),
     getUserById: jest.fn(),
   }
 
@@ -38,9 +39,6 @@ describe('Auth', () => {
       const repository: AuthRepository = {
         ...emptyRepository,
         createUser: jest.fn().mockReturnValue(Promise.resolve(mockId)),
-        getFullUserByEmail: jest.fn(),
-        createVerificationToken: jest.fn(),
-        verifyUser: jest.fn(),
       }
 
       const service = createService(emptyPasswordUtils, jwtService, repository)
@@ -70,9 +68,6 @@ describe('Auth', () => {
       const repository: AuthRepository = {
         ...emptyRepository,
         createUser: mockCreateUser,
-        getFullUserByEmail: jest.fn(),
-        createVerificationToken: jest.fn(),
-        verifyUser: jest.fn(),
       }
       const service = createService(passwordUtils, jwtService, repository)
       await service.signUp(mockEmail, mockPassword)
@@ -103,8 +98,6 @@ describe('Auth', () => {
       const repository: AuthRepository = {
         ...emptyRepository,
         getFullUserByEmail: jest.fn().mockResolvedValue(mockUser),
-        createVerificationToken: jest.fn(),
-        verifyUser: jest.fn(),
       }
 
       const service = createService(passwordUtils, jwtService, repository)
@@ -118,6 +111,37 @@ describe('Auth', () => {
       expect(result.token).toBe(mockToken)
     })
 
+    it('can verify a user when verification token is less than a day old', async () => {
+      const mockUserId = uuid.v4()
+
+      const repository = {
+        ...emptyRepository,
+        getVerificationTokenData: jest.fn().mockResolvedValue({
+          user_id: mockUserId,
+          created_at: new Date(),
+        }),
+        setUserVerification: jest.fn(),
+      }
+
+      const mockUser = {
+        id: mockUserId,
+        email: 'hello@felix.franzen.com',
+        password: '1234567890',
+      }
+
+      const service = createService(
+        emptyPasswordUtils,
+        emptyJwtUtils,
+        repository
+      )
+
+      await service.verifyUser(mockUser.id)
+      expect(repository.setUserVerification).toHaveBeenCalledWith(
+        mockUser.id,
+        true
+      )
+    })
+
     describe('Fails', () => {
       it('can not login when no user has the supplied email', async () => {
         const mockUser = {
@@ -129,8 +153,6 @@ describe('Auth', () => {
         const repository: AuthRepository = {
           ...emptyRepository,
           getFullUserByEmail: jest.fn().mockResolvedValue(mockUser),
-          createVerificationToken: jest.fn(),
-          verifyUser: jest.fn(),
         }
 
         const service = createService(
@@ -162,8 +184,6 @@ describe('Auth', () => {
         const repository: AuthRepository = {
           ...emptyRepository,
           getFullUserByEmail: jest.fn().mockResolvedValue(mockUser),
-          createVerificationToken: jest.fn(),
-          verifyUser: jest.fn(),
         }
 
         const service = createService(passwordUtils, emptyJwtUtils, repository)

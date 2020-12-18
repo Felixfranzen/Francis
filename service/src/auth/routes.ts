@@ -41,7 +41,7 @@ export const createRoutes = (
   })
 
   router.post('/verify', async (req, res) => {
-    if (!req.query) {
+    if (!req.query || !req.query.token) {
       res.sendStatus(400)
       return
     }

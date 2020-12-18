@@ -12,9 +12,17 @@ import {
   updateVerification,
 } from './queries/index.queries'
 
+type Role = 'user' | 'admin'
+
 type JwtContent = {
   userId: string
-  role: 'user' | 'admin'
+  role: Role
+}
+
+type User = {
+  email: string
+  role: Role
+  isVerified: boolean
 }
 
 export const createRepository = (query: Database['query']) => {
@@ -40,43 +48,38 @@ export const createRepository = (query: Database['query']) => {
     return result[0].id
   }
 
-  const createVerificationToken = async (userId: string) => {
-    const token = crypto.randomBytes(16).toString('hex')
-    await query(insertVerificationToken, { userId, token: token })
+  const assignVerificationToken = async (token: string, userId: string) => {
+    await query(insertVerificationToken, { userId, token })
     return token
   }
 
-  const verifyUser = async (token: string) => {
+  const getVerificationTokenData = async (token: string) => {
     const tokenData = await query(selectVerificationToken, { token })
-    if (!tokenData[0]) {
-      throw new Error('No matching token')
+    if (tokenData.length === 0) {
+      return undefined
     }
-    const { created_at, user_id } = tokenData[0]
+    return tokenData[0]
+  }
 
-    // 1 day
-    const expiry = new Date()
-    expiry.setDate(expiry.getDate() - 1)
-    if (created_at < expiry) {
-      throw new Error('Token expired')
-    }
-
-    await query(updateVerification, {
-      userId: user_id,
-      verified: true,
-    })
+  const setUserVerification = async (userId: string, verified: boolean) => {
+    await query(updateVerification, { userId, verified })
   }
 
   const getUserById = async (userId: string) => {
     const result = await query(selectUserById, { userId })
+    if (result.length === 0) {
+      return undefined
+    }
     return result[0]
   }
 
   return {
-    getFullUserByEmail,
     createUser,
-    createVerificationToken,
-    verifyUser,
+    getFullUserByEmail,
     getUserById,
+    assignVerificationToken,
+    getVerificationTokenData,
+    setUserVerification,
   }
 }
 
@@ -95,15 +98,19 @@ export const createService = (
     const hashedPassword = await passwordUtils.encrypt(password)
     const userId = await repository.createUser(email, hashedPassword, role)
 
-    const verificationToken = await repository.createVerificationToken(userId)
-    const content: JwtContent = { userId, role }
-    const token = await jwtUtils.sign(content)
+    const token = crypto.randomBytes(16).toString('hex')
+    const verificationToken = await repository.assignVerificationToken(
+      token,
+      userId
+    )
+    const jwtContent: JwtContent = { userId, role }
+    const jwtToken = await jwtUtils.sign(jwtContent)
 
     return {
       email: email,
       id: userId,
       verificationToken,
-      token,
+      token: jwtToken,
     }
   }
 
@@ -153,12 +160,30 @@ export const createService = (
     }
   }
 
+  const verifyUser = async (token: string) => {
+    const tokenData = await repository.getVerificationTokenData(token)
+    if (!tokenData) {
+      throw new Error('No matching token')
+    }
+
+    const { created_at, user_id } = tokenData
+
+    // 1 day
+    const expiry = new Date()
+    expiry.setDate(expiry.getDate() - 1)
+    if (created_at < expiry) {
+      throw new Error('Token expired')
+    }
+
+    await repository.setUserVerification(user_id, true)
+  }
+
   // TODO include userId in verifyUser to make sure that the right user is verified
   // user id could be sent as a paramter in the email link
   return {
     signUp,
     login,
-    verifyUser: repository.verifyUser,
+    verifyUser,
     getUserById: repository.getUserById,
     parseToken,
   }
