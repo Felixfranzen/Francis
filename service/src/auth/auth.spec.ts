@@ -55,10 +55,6 @@ describe('Auth', () => {
         ...emptyPasswordUtils,
         encrypt: jest.fn().mockResolvedValue(mockEncryptedPassword),
       }
-      const jwtService: JwtUtils = {
-        ...emptyJwtUtils,
-        sign: jest.fn().mockReturnValue(Promise.resolve('token')),
-      }
 
       const mockId = uuid.v4()
       const mockEmail = 'hello@felix.franzen.com'
@@ -69,7 +65,7 @@ describe('Auth', () => {
         ...emptyRepository,
         createUser: mockCreateUser,
       }
-      const service = createService(passwordUtils, jwtService, repository)
+      const service = createService(passwordUtils, emptyJwtUtils, repository)
       await service.signUp(mockEmail, mockPassword)
       expect(passwordUtils.encrypt).toHaveBeenCalledWith(mockPassword)
 
