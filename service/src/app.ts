@@ -2,6 +2,8 @@ import morgan from 'morgan'
 import express from 'express'
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
+import swaggerUi from 'swagger-ui-express'
+import swaggerDefinition from '../swagger.json'
 import { createRoutes as createFeatureRoutes } from './feature/routes'
 import { createRoutes as createAuthRoutes } from './auth/routes'
 import { createDatabase } from './database'
@@ -38,10 +40,11 @@ export const createApp = async (config: Config) => {
 
   const authMiddleware = createAuthMiddleware(authService.parseToken)
 
+  app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDefinition))
   app.use(morgan('tiny'))
   app.use(bodyParser.json())
-  app.use(cookieParser())
   app.use(bodyParser.urlencoded({ extended: false }))
+  app.use(cookieParser())
 
   app.use(createAuthRoutes(authMiddleware, authService))
   app.use(

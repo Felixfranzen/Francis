@@ -1,0 +1,20 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "version": "0.0.1",
+    "title": "Francis",
+    "description": "Create and manage feature flags"
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Handles user authorization and authentication"
+    },
+    {
+      "name": "Feature",
+      "description": "Manage features, flags and predicates"
+    }
+  ]
+}

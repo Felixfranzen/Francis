@@ -8,13 +8,13 @@ export type Database = {
   query: <T, U>(preparedQuery: PreparedQuery<T, U>, params: T) => Promise<U[]>
 }
 
-export const createDatabase = async (dbConfig: Config): Promise<Database> => {
+export const createDatabase = async (config: Config): Promise<Database> => {
   const pool = new Pool({
-    host: dbConfig.DB_HOST,
-    user: dbConfig.DB_USER,
-    password: dbConfig.DB_PASSWORD,
-    database: dbConfig.DB_NAME,
-    port: dbConfig.DB_PORT,
+    host: config.DB_HOST,
+    user: config.DB_USER,
+    password: config.DB_PASSWORD,
+    database: config.DB_NAME,
+    port: config.DB_PORT,
   })
 
   const query = async <T, U>(preparedQuery: PreparedQuery<T, U>, params: T) => {

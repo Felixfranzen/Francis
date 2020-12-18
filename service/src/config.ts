@@ -31,9 +31,5 @@ export const parseConfig = (env: any): Config => {
     ...env,
     APP_PORT: parseInt(env.APP_PORT),
     DB_PORT: parseInt(env.DB_PORT),
-    DB_MIGRATIONS: {
-      DIRECTORY: `${__dirname}/migrations`,
-      TABLE_NAME: 'knex_migrations',
-    },
   }
 }
