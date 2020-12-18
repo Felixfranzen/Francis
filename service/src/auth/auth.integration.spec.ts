@@ -39,9 +39,9 @@ describe('Auth', () => {
       expect(insertedId).toBeDefined()
 
       const user = await repository.getFullUserByEmail(mockUser.email)
-      expect(user.email).toBe(mockUser.email)
-      expect(user.password).toBe(mockUser.password)
-      expect(user.role).toBe(mockUser.role)
+      expect(user?.email).toBe(mockUser.email)
+      expect(user?.password).toBe(mockUser.password)
+      expect(user?.role).toBe(mockUser.role)
     })
 
     it('can create a token', () => {})

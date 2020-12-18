@@ -20,10 +20,11 @@ type JwtContent = {
 export const createRepository = (query: Database['query']) => {
   const getFullUserByEmail = async (email: string) => {
     const result = await query(selectFullUserByEmail, { email })
-    if (!result[0]) {
-      throw new Error('No user found')
+    if (result.length === 0) {
+      return undefined
+    } else {
+      return result[0]
     }
-    return result[0]
   }
 
   const createUser = async (
@@ -67,10 +68,6 @@ export const createRepository = (query: Database['query']) => {
 
   const getUserById = async (userId: string) => {
     const result = await query(selectUserById, { userId })
-    if (result.length === 0) {
-      throw new Error('User not found')
-    }
-
     return result[0]
   }
 
@@ -112,6 +109,10 @@ export const createService = (
 
   const login = async (email: string, password: Password) => {
     const user = await repository.getFullUserByEmail(email)
+    if (!user) {
+      throw new Error('Not found')
+    }
+
     const isCorrectPassword = await passwordUtils.isEqual(
       password,
       user.password
