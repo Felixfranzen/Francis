@@ -120,13 +120,6 @@ describe('Auth', () => {
           user_id: mockUserId,
           created_at: new Date(),
         }),
-        setUserVerification: jest.fn(),
-      }
-
-      const mockUser = {
-        id: mockUserId,
-        email: 'hello@felix.franzen.com',
-        password: '1234567890',
       }
 
       const service = createService(
@@ -135,9 +128,9 @@ describe('Auth', () => {
         repository
       )
 
-      await service.verifyUser(mockUser.id)
+      await service.verifyUser('sometoken')
       expect(repository.setUserVerification).toHaveBeenCalledWith(
-        mockUser.id,
+        mockUserId,
         true
       )
     })
