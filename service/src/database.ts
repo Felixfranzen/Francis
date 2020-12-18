@@ -17,6 +17,21 @@ export const createDatabase = async (config: Config): Promise<Database> => {
     port: config.DB_PORT,
   })
 
+  try {
+    await pool.query('SELECT 1')
+  } catch (e) {
+    throw new Error(`Failed to connect to DB ${e}`)
+  }
+
+  const isAlive = async () => {
+    try {
+      await pool.query('SELECT 1')
+      return true
+    } catch (e) {
+      return false
+    }
+  }
+
   const query = async <T, U>(preparedQuery: PreparedQuery<T, U>, params: T) => {
     const client = await pool.connect()
     try {
@@ -28,15 +43,6 @@ export const createDatabase = async (config: Config): Promise<Database> => {
       console.log(e)
       client.release()
       throw new Error('Query failed')
-    }
-  }
-
-  const isAlive = async () => {
-    try {
-      await pool.query('SELECT 1')
-      return true
-    } catch (e) {
-      return false
     }
   }
 

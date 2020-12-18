@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv'
 import { createApp } from './app'
 import { parseConfig } from './config'
 
-if (process.env.NODE_ENV) {
+if (process.env.NODE_ENV === 'development') {
   dotenv.config()
 }
 

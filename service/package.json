@@ -7,7 +7,7 @@
     "up": "docker-compose up -d && sleep 5",
     "down": "docker-compose down",
     "build": "tsc -p ./tsconfig.json",
-    "start": "node ./dist/index.js",
+    "start": "NODE_ENV=production node ./dist/src/index.js",
     "start:dev": "npm run up && npm run db:migrate:up:dev && NODE_ENV=development ts-node-dev --inspect=127.0.0.1:9234 ./src",
     "test": "npm run up && npm run db:migrate:up:dev && jest . --passWithNoTests && npm run down",
     "pgtyped:watch": "pgtyped -w -c pgtyped_config.json",

@@ -22,8 +22,6 @@ import { encrypt, isEqual } from './auth/password'
 import { createUtils as createJwtUtils } from './auth/jwt-utils'
 
 export const createApp = async (config: Config) => {
-  const app = express()
-
   const database = await createDatabase(config)
 
   const jwtUtils = createJwtUtils(config.AUTH_SECRET)
@@ -40,6 +38,7 @@ export const createApp = async (config: Config) => {
 
   const authMiddleware = createAuthMiddleware(authService.parseToken)
 
+  const app = express()
   app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDefinition))
   app.use(morgan('tiny'))
   app.use(bodyParser.json())
