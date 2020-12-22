@@ -9,7 +9,9 @@ export type Database = {
 }
 
 export const createDatabase = async (config: Config): Promise<Database> => {
-  const pool = new Pool({ connectionString: config.DATABASE_URL })
+  const pool = new Pool({
+    connectionString: config.DATABASE_URL,
+  })
 
   try {
     await pool.query('SELECT 1')
