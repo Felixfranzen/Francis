@@ -1,7 +1,7 @@
 {
-  "name": "service",
-  "version": "1.0.0",
-  "description": "",
+  "name": "francis-service",
+  "version": "0.0.1",
+  "description": "Manage feature flags",
   "main": "index.js",
   "scripts": {
     "up": "docker-compose up -d && sleep 5",
@@ -14,11 +14,11 @@
     "db:migrate:create": "db-migrate create -e pg",
     "db:migrate:up:dev": "db-migrate up -e dev",
     "db:migrate:down:dev": "db-migrate down -e dev",
-    "db:migrate:up:prod": "db-migrate up -e prod",
-    "db:migrate:down:prod": "db-migrate down -e prod"
+    "db:migrate:up:prod": "db-migrate up",
+    "db:migrate:down:prod": "db-migrate down"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Felix Franzén",
+  "license": "MIT",
   "dependencies": {
     "@pgtyped/cli": "^0.9.0",
     "@pgtyped/query": "^0.9.0",
