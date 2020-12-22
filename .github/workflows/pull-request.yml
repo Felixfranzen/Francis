@@ -1,23 +1,27 @@
-name: Test pull request
+name: Pull request
 
 on:
   pull_request:
     branches: [main]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./service
 
     steps:
       - uses: actions/checkout@v2
 
-      - name: Use node.js ${{ matrix.node-version }}
+      - name: Use node.js 14.15.3
         uses: actions/setup-node@v1
         with:
           node-version: '14.15.3'
 
-      - name: Setup and run tests
-        working-directory: ./service
-        run: |
-          npm ci
-          npm test
+      - name: Install
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
