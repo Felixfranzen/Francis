@@ -50,6 +50,8 @@ export const createApp = async (config: Config) => {
     createFeatureRoutes(authMiddleware, featureService, authService.parseToken)
   )
 
+  app.get('/ping', (_, res) => res.send('pong'))
+
   return {
     start: async () => {
       app.listen(config.PORT, () =>
