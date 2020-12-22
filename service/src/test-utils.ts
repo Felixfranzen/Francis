@@ -4,7 +4,6 @@ import bodyParser from 'body-parser'
 
 export const createMockApp = () => {
   const app = express()
-  app.use(cookieParser())
   app.use(bodyParser.json())
   app.use(cookieParser())
   app.use(bodyParser.urlencoded({ extended: false }))
