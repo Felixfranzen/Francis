@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: '14.15.3'
 
-      - name: Setup
+      - name: Install
         run: npm ci
 
       - name: Run tests
