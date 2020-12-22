@@ -19,12 +19,6 @@ type JwtContent = {
   role: Role
 }
 
-type User = {
-  email: string
-  role: Role
-  isVerified: boolean
-}
-
 export const createRepository = (query: Database['query']) => {
   const getFullUserByEmail = async (email: string) => {
     const result = await query(selectFullUserByEmail, { email })
