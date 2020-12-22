@@ -38,9 +38,7 @@ jobs:
         working-directory: ./service
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: |
-          ls
-          heroku container:push -a ${{ secrets.HEROKU_APP_NAME }} web
+        run: heroku container:push -a ${{ secrets.HEROKU_APP_NAME }} web
 
       - name: Release
         working-directory: ./service
