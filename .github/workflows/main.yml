@@ -8,6 +8,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    defaults:
+      working-directory: ./service
+
     steps:
       - uses: actions/checkout@v2
 
@@ -16,11 +19,11 @@ jobs:
         with:
           node-version: '14.15.3'
 
-      - name: Setup and run tests
-        working-directory: ./service
-        run: |
-          npm ci
-          npm test
+      - name: Setup
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
 
       - name: Login to Heroku Container registry
         env:
@@ -28,13 +31,11 @@ jobs:
         run: heroku container:login
 
       - name: Build and push
-        working-directory: ./service
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: heroku container:push -a ${{ secrets.HEROKU_APP_NAME }} --recursive
 
       - name: Release web
-        working-directory: ./service
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: heroku container:release -a ${{ secrets.HEROKU_APP_NAME }} web

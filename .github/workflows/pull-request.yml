@@ -1,12 +1,15 @@
-name: Test pull request
+name: Push main
 
 on:
-  pull_request:
+  push:
     branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    defaults:
+      working-directory: ./service
 
     steps:
       - uses: actions/checkout@v2
@@ -16,8 +19,8 @@ jobs:
         with:
           node-version: '14.15.3'
 
-      - name: Setup and run tests
-        working-directory: ./service
-        run: |
-          npm ci
-          npm test
+      - name: Setup
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
