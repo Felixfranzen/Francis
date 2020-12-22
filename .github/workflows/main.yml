@@ -1,9 +1,7 @@
-name: CI
+name: Push main
 
 on:
   push:
-    branches: [main]
-  pull_request:
     branches: [main]
 
 jobs:
@@ -37,9 +35,9 @@ jobs:
         working-directory: ./service
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:push -a ${{ secrets.HEROKU_APP_NAME }} web
+        run: heroku container:push -a ${{ secrets.HEROKU_APP_NAME }} --recursive
 
-      - name: Release
+      - name: Release web
         working-directory: ./service
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
