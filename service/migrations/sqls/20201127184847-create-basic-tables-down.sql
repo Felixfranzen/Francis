@@ -1,6 +1,6 @@
 BEGIN;
 DROP TABLE IF EXISTS verification_token;
 DROP TABLE IF EXISTS flag;
-DROP TABLE IF EXISTS user_account;
 DROP TABLE IF EXISTS feature;
+DROP TABLE IF EXISTS user_account;
 COMMIT;
