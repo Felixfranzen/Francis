@@ -52,8 +52,8 @@ export const createApp = async (config: Config) => {
 
   return {
     start: async () => {
-      app.listen(config.APP_PORT, () =>
-        console.log(`Service started on port ${config.APP_PORT}!`)
+      app.listen(config.PORT, () =>
+        console.log(`Service started on port ${config.PORT}!`)
       )
     },
   }
