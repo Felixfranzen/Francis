@@ -9,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
 
     defaults:
-      working-directory: ./service
+      run:
+        working-directory: ./service
 
     steps:
       - uses: actions/checkout@v2
