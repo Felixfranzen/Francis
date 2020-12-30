@@ -20,11 +20,20 @@ import {
 import { encrypt, isEqual } from './auth/password'
 
 import { createUtils as createJwtUtils } from './auth/jwt-utils'
+import { createRedis } from './redis'
+import {
+  createService as createSessionService,
+  createRepository as createSessionRepository,
+} from './auth/session'
 
 export const createApp = async (config: Config) => {
   const database = await createDatabase(config)
+  const redis = createRedis(config)
 
   const jwtUtils = createJwtUtils(config.AUTH_SECRET)
+
+  const sessionRepository = createSessionRepository(redis)
+  const sessionService = createSessionService(sessionRepository)
 
   const featureRepository = createFeatureRepository(database.query)
   const featureService = createFeatureService(featureRepository)

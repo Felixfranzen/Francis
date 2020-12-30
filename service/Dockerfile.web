@@ -7,5 +7,5 @@ RUN npm install
 
 ENV NODE_ENV=production
 RUN npm run build
-
+RUN sleep 5
 CMD npm start
