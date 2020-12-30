@@ -13,12 +13,18 @@ describe('Redis', () => {
     await redis.quit()
   })
 
-  it('can call', async () => {
+  it('can get and set', async () => {
     const key = uuid.v4()
     const value = uuid.v4()
     await redis.set(key, value)
     const result = await redis.get(key)
     expect(result).toBe(value)
+  })
+
+  it('returns null if no key is found', async () => {
+    const key = uuid.v4()
+    const result = await redis.get(key)
+    expect(result).toBe(null)
   })
 
   it('can quit', async () => {
