@@ -19,7 +19,6 @@ import {
 } from './auth/auth'
 import { encrypt, isEqual } from './auth/password'
 
-import { createUtils as createJwtUtils } from './auth/jwt-utils'
 import { createRedis } from './redis'
 import {
   createService as createSessionService,
@@ -30,8 +29,6 @@ export const createApp = async (config: Config) => {
   const database = await createDatabase(config)
   const redis = createRedis(config)
 
-  const jwtUtils = createJwtUtils(config.AUTH_SECRET)
-
   const sessionRepository = createSessionRepository(redis)
   const sessionService = createSessionService(sessionRepository)
 
@@ -39,11 +36,7 @@ export const createApp = async (config: Config) => {
   const featureService = createFeatureService(featureRepository)
 
   const authRepository = createAuthRepository(database.query)
-  const authService = createAuthService(
-    { encrypt, isEqual },
-    jwtUtils,
-    authRepository
-  )
+  const authService = createAuthService({ encrypt, isEqual }, authRepository)
 
   const authMiddleware = createAuthMiddleware(authService.parseToken)
 

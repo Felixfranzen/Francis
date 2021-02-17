@@ -1,6 +1,5 @@
 import * as crypto from 'crypto'
 import { Database } from '../database'
-import { JwtUtils } from './jwt-utils'
 import { Request, Response, NextFunction } from 'express'
 import { Password } from './password'
 import {
@@ -11,13 +10,7 @@ import {
   selectVerificationToken,
   updateVerification,
 } from './queries/index.queries'
-
-type Role = 'user' | 'admin'
-
-type JwtContent = {
-  userId: string
-  role: Role
-}
+import { SessionService } from './session'
 
 export const createRepository = (query: Database['query']) => {
   const getFullUserByEmail = async (email: string) => {
@@ -84,7 +77,6 @@ export const createService = (
     encrypt: (password: Password) => Promise<Password>
     isEqual: (password: Password, encryptedPassword: string) => Promise<boolean>
   },
-  jwtUtils: JwtUtils,
   repository: AuthRepository
 ) => {
   const signUp = async (email: string, password: Password) => {
@@ -97,14 +89,11 @@ export const createService = (
       token,
       userId
     )
-    const jwtContent: JwtContent = { userId, role }
-    const jwtToken = await jwtUtils.sign(jwtContent)
 
     return {
       email: email,
       id: userId,
       verificationToken,
-      token: jwtToken,
     }
   }
 
@@ -123,39 +112,16 @@ export const createService = (
       throw new Error('Invalid username/password')
     }
 
-    const content: JwtContent = { userId: user.id, role: user.role }
-    const token = await jwtUtils.sign(content)
     return {
       email: user.email,
       id: user.id,
-      token,
     }
   }
 
-  const isValidToken = (decodedToken: unknown): decodedToken is JwtContent => {
-    try {
-      const content = decodedToken as any
-      return (
-        content &&
-        typeof content.userId === 'string' &&
-        (content.role === 'admin' || content.role === 'user')
-      )
-    } catch (e) {
-      return false
-    }
-  }
-
-  const parseToken = async (token: string) => {
-    const decoded = await jwtUtils.verifyAndDecode(token)
-    if (isValidToken(decoded)) {
-      return decoded
-    } else {
-      throw new Error('Not a valid token')
-    }
-  }
-
-  const verifyUser = async (token: string) => {
-    const tokenData = await repository.getVerificationTokenData(token)
+  const verifyUser = async (verificationToken: string) => {
+    const tokenData = await repository.getVerificationTokenData(
+      verificationToken
+    )
     if (!tokenData) {
       throw new Error('No matching token')
     }
@@ -179,14 +145,13 @@ export const createService = (
     login,
     verifyUser,
     getUserById: repository.getUserById,
-    parseToken,
   }
 }
 
 export type AuthService = ReturnType<typeof createService>
 
 export const createAuthMiddleware = (
-  parseToken: (token: string) => Promise<JwtContent>
+  getUserBySessionId: (sessionId: string) => Promise<{ role: 'admin' | 'user' }>
 ) => {
   const verifyToken = async (
     req: Request,
