@@ -14,8 +14,6 @@ import {
 } from './feature/feature'
 import {
   createService as createAuthService,
-  createRepository as createAuthRepository,
-  createAuthMiddleware,
 } from './auth/auth'
 import { encrypt, isEqual } from './auth/password'
 
@@ -25,20 +23,34 @@ import {
   createRepository as createSessionRepository,
 } from './auth/session'
 
+import {
+  createService as createUserService,
+  createRepository as createUserRepository,
+} from './auth/user'
+
+import {
+  createService as createVerificationService,
+  createRepository as createVerificationRepository,
+} from './auth/verification'
+
 export const createApp = async (config: Config) => {
   const database = await createDatabase(config)
   const redis = createRedis(config)
 
-  const sessionRepository = createSessionRepository(redis)
-  const sessionService = createSessionService(sessionRepository)
-
   const featureRepository = createFeatureRepository(database.query)
   const featureService = createFeatureService(featureRepository)
 
-  const authRepository = createAuthRepository(database.query)
-  const authService = createAuthService({ encrypt, isEqual }, authRepository)
+  const sessionRepository = createSessionRepository(redis)
+  const sessionService = createSessionService(sessionRepository)
 
-  const authMiddleware = createAuthMiddleware(authService.parseToken)
+  const userRepository = createUserRepository(database.query)
+  const userService = createUserService({ encrypt, isEqual},  userRepository)
+
+  const verificationRepository = createVerificationRepository(database.query)
+  const verificationService = createVerificationService(verificationRepository)
+
+  const authService = createAuthService(sessionService, verificationService, userService)
+
 
   const app = express()
   app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDefinition))
@@ -47,9 +59,9 @@ export const createApp = async (config: Config) => {
   app.use(bodyParser.urlencoded({ extended: false }))
   app.use(cookieParser())
 
-  app.use(createAuthRoutes(authMiddleware, authService))
+  app.use(createAuthRoutes(authService))
   app.use(
-    createFeatureRoutes(authMiddleware, featureService, authService.parseToken)
+    createFeatureRoutes(featureService)
   )
 
   app.get('/ping', (_, res) => res.send('pong'))

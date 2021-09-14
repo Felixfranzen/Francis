@@ -41,6 +41,7 @@ export interface ISelectUserByIdParams {
 
 /** 'SelectUserById' return type */
 export interface ISelectUserByIdResult {
+  id: string;
   email: string;
   role: user_role;
   is_verified: boolean;
@@ -52,12 +53,12 @@ export interface ISelectUserByIdQuery {
   result: ISelectUserByIdResult;
 }
 
-const selectUserByIdIR: any = {"name":"selectUserById","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":181,"b":186,"line":5,"col":62}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT email, role, is_verified FROM user_account WHERE id = :userId","loc":{"a":119,"b":186,"line":5,"col":0}}};
+const selectUserByIdIR: any = {"name":"selectUserById","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":185,"b":190,"line":5,"col":66}]}}],"usedParamSet":{"userId":true},"statement":{"body":"SELECT id, email, role, is_verified FROM user_account WHERE id = :userId","loc":{"a":119,"b":190,"line":5,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * SELECT email, role, is_verified FROM user_account WHERE id = :userId
+ * SELECT id, email, role, is_verified FROM user_account WHERE id = :userId
  * ```
  */
 export const selectUserById = new PreparedQuery<ISelectUserByIdParams,ISelectUserByIdResult>(selectUserByIdIR);
@@ -81,7 +82,7 @@ export interface IInsertUserQuery {
   result: IInsertUserResult;
 }
 
-const insertUserIR: any = {"name":"insertUser","params":[{"name":"email","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":271,"b":275,"line":8,"col":58}]}},{"name":"password","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":279,"b":286,"line":8,"col":66}]}},{"name":"role","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":290,"b":293,"line":8,"col":77}]}}],"usedParamSet":{"email":true,"password":true,"role":true},"statement":{"body":"INSERT INTO user_account (email, password, role) VALUES (:email, :password, :role) RETURNING id","loc":{"a":213,"b":307,"line":8,"col":0}}};
+const insertUserIR: any = {"name":"insertUser","params":[{"name":"email","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":275,"b":279,"line":8,"col":58}]}},{"name":"password","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":283,"b":290,"line":8,"col":66}]}},{"name":"role","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":294,"b":297,"line":8,"col":77}]}}],"usedParamSet":{"email":true,"password":true,"role":true},"statement":{"body":"INSERT INTO user_account (email, password, role) VALUES (:email, :password, :role) RETURNING id","loc":{"a":217,"b":311,"line":8,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -107,7 +108,7 @@ export interface IInsertVerificationTokenQuery {
   result: IInsertVerificationTokenResult;
 }
 
-const insertVerificationTokenIR: any = {"name":"insertVerificationToken","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":404,"b":409,"line":11,"col":57}]}},{"name":"token","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":413,"b":417,"line":11,"col":66}]}}],"usedParamSet":{"userId":true,"token":true},"statement":{"body":"INSERT INTO verification_token (user_id, token) VALUES (:userId, :token)","loc":{"a":347,"b":418,"line":11,"col":0}}};
+const insertVerificationTokenIR: any = {"name":"insertVerificationToken","params":[{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":408,"b":413,"line":11,"col":57}]}},{"name":"token","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":417,"b":421,"line":11,"col":66}]}}],"usedParamSet":{"userId":true,"token":true},"statement":{"body":"INSERT INTO verification_token (user_id, token) VALUES (:userId, :token)","loc":{"a":351,"b":422,"line":11,"col":0}}};
 
 /**
  * Query generated from SQL:
@@ -121,6 +122,7 @@ export const insertVerificationToken = new PreparedQuery<IInsertVerificationToke
 /** 'SelectVerificationToken' parameters type */
 export interface ISelectVerificationTokenParams {
   token: string | null | void;
+  user_id: string | null | void;
 }
 
 /** 'SelectVerificationToken' return type */
@@ -137,12 +139,12 @@ export interface ISelectVerificationTokenQuery {
   result: ISelectVerificationTokenResult;
 }
 
-const selectVerificationTokenIR: any = {"name":"selectVerificationToken","params":[{"name":"token","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":506,"b":510,"line":14,"col":48}]}}],"usedParamSet":{"token":true},"statement":{"body":"SELECT * FROM verification_token WHERE token = :token","loc":{"a":458,"b":510,"line":14,"col":0}}};
+const selectVerificationTokenIR: any = {"name":"selectVerificationToken","params":[{"name":"token","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":510,"b":514,"line":14,"col":48}]}},{"name":"user_id","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":531,"b":537,"line":14,"col":69}]}}],"usedParamSet":{"token":true,"user_id":true},"statement":{"body":"SELECT * FROM verification_token WHERE token = :token AND user_id = :user_id","loc":{"a":462,"b":537,"line":14,"col":0}}};
 
 /**
  * Query generated from SQL:
  * ```
- * SELECT * FROM verification_token WHERE token = :token
+ * SELECT * FROM verification_token WHERE token = :token AND user_id = :user_id
  * ```
  */
 export const selectVerificationToken = new PreparedQuery<ISelectVerificationTokenParams,ISelectVerificationTokenResult>(selectVerificationTokenIR);
@@ -163,7 +165,7 @@ export interface IUpdateVerificationQuery {
   result: IUpdateVerificationResult;
 }
 
-const updateVerificationIR: any = {"name":"updateVerification","params":[{"name":"verified","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":584,"b":591,"line":17,"col":39}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":605,"b":610,"line":17,"col":60}]}}],"usedParamSet":{"verified":true,"userId":true},"statement":{"body":"UPDATE user_account SET is_verified = :verified WHERE id = :userId","loc":{"a":545,"b":610,"line":17,"col":0}}};
+const updateVerificationIR: any = {"name":"updateVerification","params":[{"name":"verified","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":611,"b":618,"line":17,"col":39}]}},{"name":"userId","transform":{"type":"scalar"},"codeRefs":{"used":[{"a":632,"b":637,"line":17,"col":60}]}}],"usedParamSet":{"verified":true,"userId":true},"statement":{"body":"UPDATE user_account SET is_verified = :verified WHERE id = :userId","loc":{"a":572,"b":637,"line":17,"col":0}}};
 
 /**
  * Query generated from SQL:
