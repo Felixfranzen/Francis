@@ -8,7 +8,8 @@
     "outDir": "dist",
     "sourceMap": true,
     "strict": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "typeRoots": ["@types"]
   },
   "include": ["src/**/*.ts"],
 }

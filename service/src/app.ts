@@ -32,6 +32,7 @@ import {
   createService as createVerificationService,
   createRepository as createVerificationRepository,
 } from './auth/verification'
+import { createAuthMiddleware } from './auth/middleware'
 
 export const createApp = async (config: Config) => {
   const database = await createDatabase(config)
@@ -50,7 +51,7 @@ export const createApp = async (config: Config) => {
   const verificationService = createVerificationService(verificationRepository)
 
   const authService = createAuthService(sessionService, verificationService, userService)
-
+  const authMiddleware = createAuthMiddleware(sessionService)
 
   const app = express()
   app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDefinition))
@@ -61,7 +62,7 @@ export const createApp = async (config: Config) => {
 
   app.use(createAuthRoutes(authService))
   app.use(
-    createFeatureRoutes(featureService)
+    createFeatureRoutes(featureService, authMiddleware)
   )
 
   app.get('/ping', (_, res) => res.send('pong'))

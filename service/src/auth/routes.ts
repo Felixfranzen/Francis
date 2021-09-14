@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import { AuthService } from './auth'
+import { AuthMiddleware } from './middleware'
 
 export const createRoutes = (
   authService: AuthService,
@@ -11,14 +12,17 @@ export const createRoutes = (
       res.sendStatus(400)
       return
     }
-
-    const { sessionId } = await authService.signUp(req.body.email, req.body.password)
-    // todo send verification token
-    res.cookie('session_id', sessionId, {
-      maxAge: 900000,
-      httpOnly: true,
-    })
-    res.send(200)
+    try {
+      const { sessionId } = await authService.signUp(req.body.email, req.body.password)
+      // todo send verification token
+      res.cookie('session_id', sessionId, {
+        maxAge: 900000,
+        httpOnly: true,
+      })
+      res.send(200)
+    } catch (e) {
+      res.status(500).send(e)
+    }
   })
 
   router.post('/login', async (req, res) => {
@@ -41,7 +45,8 @@ export const createRoutes = (
   })
 
   router.post('/verify', async (req, res) => {
-    if (!req.query || !req.query.token || req.query.user_id) {
+    console.log(req.query)
+    if (!req.query || !req.query.token || !req.query.user_id) {
       res.sendStatus(400)
       return
     }
@@ -50,7 +55,7 @@ export const createRoutes = (
       await authService.verifyUser(req.query.user_id as string, req.query.token as string)
       res.sendStatus(201)
     } catch (e) {
-      res.sendStatus(400)
+      res.sendStatus(500)
     }
   })
 

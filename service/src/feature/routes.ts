@@ -1,36 +1,38 @@
-import { NextFunction, Router, Request, Response } from 'express'
+import { Router } from 'express'
+import { AuthMiddleware } from '../auth/middleware'
 import { FeatureService } from './feature'
 
 export const createRoutes = (
   featureService: FeatureService,
+  authMiddleware: AuthMiddleware
 ) => {
   const router = Router()
 
   router.post(
     '/feature',
+    authMiddleware.verifySession,
     async (req, res) => {
-      if (!req.body) {
+      if (!req.body || !req.user) {
         res.sendStatus(400)
         return
       }
 
-      const { userId } = await parseToken(req.cookies.access_token)
-      const result = await featureService.create({ userId, ...req.body })
+      const result = await featureService.create({ userId: req.user.id, ...req.body })
       res.send(result)
     }
   )
 
   router.delete(
     '/feature/:id',
+    authMiddleware.verifySession,
     async (req, res) => {
-      if (!req.params || !req.params.id) {
+      if (!req.params || !req.params.id || !req.user) {
         res.sendStatus(400)
         return
       }
 
-      const { userId } = await parseToken(req.cookies.access_token)
       const userHasFeature = await featureService.userHasFeature(
-        userId,
+        req.user?.id,
         req.params.id
       )
       if (!userHasFeature) {
@@ -39,7 +41,7 @@ export const createRoutes = (
       }
 
       await featureService.delete(req.params.id)
-      res.send(204)
+      res.sendStatus(204)
     }
   )
 
@@ -56,9 +58,13 @@ export const createRoutes = (
     }
   )
 
-  router.get('/feature', async (req, res) => {
-    const { userId } = await parseToken(req.cookies.access_token)
-    const result = await featureService.getFeaturesByUserId(userId)
+  router.get('/feature', authMiddleware.verifySession, async (req, res) => {
+    if (!req.user) {
+      res.sendStatus(500)
+      return
+    }
+
+    const result = await featureService.getFeaturesByUserId(req.user.id)
     res.status(200).send(result)
   })
 
