@@ -68,21 +68,13 @@ describe('Auth', () => {
       expect(result.verificationToken).toBe(mockVerificationToken)
     })
 
-    it('does not store plain text password on signup', async () => {
-    })
-
     it('can login', async () => {
     })
 
-    it('can verify a user when verification token is less than a day old', async () => {
+    it('can not login when no user has the supplied email', async () => {
     })
 
-    describe('Fails', () => {
-      it('can not login when no user has the supplied email', async () => {
-      })
-
-      it('can not login when password is invalid', async () => {
-      })
+    it('can not login when password is invalid', async () => {
     })
   })
 })

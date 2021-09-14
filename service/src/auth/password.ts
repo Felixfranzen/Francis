@@ -1,6 +1,7 @@
 import * as bcrypt from 'bcrypt'
 
 export type Password = string & { readonly Password: unique symbol }
+
 export type PasswordUtils = {
   encrypt: (password: string) => Promise<string>
   isEqual: (password: string, encryptedPassword: string) => Promise<boolean>

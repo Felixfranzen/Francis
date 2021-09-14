@@ -14,6 +14,7 @@ export type SessionRepository = ReturnType<typeof createRepository>
 
 export const createService = (repository: SessionRepository) => {
   const createSession = async (userId: string) => {
+    // TODO: FIX TTL variable
     const sessionId = crypto.randomBytes(16).toString('base64')
     await repository.set({ sessionId, userId })
     return sessionId
