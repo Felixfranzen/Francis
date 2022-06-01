@@ -1,41 +1,38 @@
-import { NextFunction, Router, Request, Response } from 'express'
-import { AuthMiddleware } from '../auth/auth'
+import { Router } from 'express'
+import { AuthMiddleware } from '../auth/middleware'
 import { FeatureService } from './feature'
 
 export const createRoutes = (
-  authMiddleware: AuthMiddleware,
   featureService: FeatureService,
-  parseToken: (token: string) => Promise<{ userId: string }>
+  authMiddleware: AuthMiddleware
 ) => {
   const router = Router()
 
   router.post(
     '/feature',
-    authMiddleware.verifyRole(['admin']),
+    authMiddleware.verifySession,
     async (req, res) => {
-      if (!req.body) {
+      if (!req.body || !req.user) {
         res.sendStatus(400)
         return
       }
 
-      const { userId } = await parseToken(req.cookies.access_token)
-      const result = await featureService.create({ userId, ...req.body })
+      const result = await featureService.create({ userId: req.user.id, ...req.body })
       res.send(result)
     }
   )
 
   router.delete(
     '/feature/:id',
-    authMiddleware.verifyRole(['admin']),
+    authMiddleware.verifySession,
     async (req, res) => {
-      if (!req.params || !req.params.id) {
+      if (!req.params || !req.params.id || !req.user) {
         res.sendStatus(400)
         return
       }
 
-      const { userId } = await parseToken(req.cookies.access_token)
       const userHasFeature = await featureService.userHasFeature(
-        userId,
+        req.user?.id,
         req.params.id
       )
       if (!userHasFeature) {
@@ -44,13 +41,12 @@ export const createRoutes = (
       }
 
       await featureService.delete(req.params.id)
-      res.send(204)
+      res.sendStatus(204)
     }
   )
 
   router.post(
     '/feature/status',
-    authMiddleware.verifyToken,
     async (req, res) => {
       if (!req.body || !req.body.feature_key || !req.body.params) {
         res.sendStatus(400)
@@ -62,9 +58,13 @@ export const createRoutes = (
     }
   )
 
-  router.get('/feature', authMiddleware.verifyToken, async (req, res) => {
-    const { userId } = await parseToken(req.cookies.access_token)
-    const result = await featureService.getFeaturesByUserId(userId)
+  router.get('/feature', authMiddleware.verifySession, async (req, res) => {
+    if (!req.user) {
+      res.sendStatus(500)
+      return
+    }
+
+    const result = await featureService.getFeaturesByUserId(req.user.id)
     res.status(200).send(result)
   })
 

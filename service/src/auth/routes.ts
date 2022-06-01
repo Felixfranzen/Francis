@@ -1,8 +1,8 @@
 import { Router } from 'express'
-import { AuthMiddleware, AuthService } from './auth'
+import { AuthService } from './auth'
+import { AuthMiddleware } from './middleware'
 
 export const createRoutes = (
-  middleware: AuthMiddleware,
   authService: AuthService,
 ) => {
   const router = Router()
@@ -12,14 +12,17 @@ export const createRoutes = (
       res.sendStatus(400)
       return
     }
-
-    const result = await authService.signUp(req.body.email, req.body.password)
-    // todo send verification token
-    res.cookie('access_token', result.token, {
-      maxAge: 900000,
-      httpOnly: true,
-    })
-    res.send(200)
+    try {
+      const { sessionId } = await authService.signUp(req.body.email, req.body.password)
+      // todo send verification token
+      res.cookie('session_id', sessionId, {
+        maxAge: 900000,
+        httpOnly: true,
+      })
+      res.send(200)
+    } catch (e) {
+      res.status(500).send(e)
+    }
   })
 
   router.post('/login', async (req, res) => {
@@ -29,11 +32,12 @@ export const createRoutes = (
     }
 
     try {
-      const result = await authService.login(req.body.email, req.body.password)
-      res.cookie('access_token', result.token, {
+      const { sessionId } = await authService.login(req.body.email, req.body.password)
+      res.cookie('session_id', sessionId, {
         maxAge: 900000,
         httpOnly: true,
       })
+
       res.send(200)
     } catch (e) {
       res.sendStatus(401)
@@ -41,23 +45,25 @@ export const createRoutes = (
   })
 
   router.post('/verify', async (req, res) => {
-    if (!req.query || !req.query.token) {
+    console.log(req.query)
+    if (!req.query || !req.query.token || !req.query.user_id) {
       res.sendStatus(400)
       return
     }
 
     try {
-      await authService.verifyUser(req.query.token as string)
+      await authService.verifyUser(req.query.user_id as string, req.query.token as string)
       res.sendStatus(201)
     } catch (e) {
-      res.sendStatus(400)
+      res.sendStatus(500)
     }
   })
 
-  router.get('/me', middleware.verifyToken, async (req, res) => {
-    const { userId } = await authService.parseToken(req.cookies.access_token)
-
-    const result = await authService.getUserById(userId)
+  router.get('/me', async (req, res) => {
+    if (!req.cookies.access_token) {
+      res.sendStatus(400)
+    }
+    const result = await authService.me(req.cookies.access_token)
     res.status(200).send(result)
   })
 
