@@ -16,6 +16,7 @@ export const createService = (
   user: UserService
 ): AuthService => {
   const signUp = async (email: string, password: string) => {
+    // TODO: Verify unique email
     const newUser = await user.create(email, password)
     const verificationToken = await verification.assignToken(newUser.id)
     const sessionId = await session.createSession(newUser.id)

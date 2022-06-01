@@ -1,9 +1,7 @@
-import { Request, Response, NextFunction } from 'express'
+import { Request, Response, NextFunction } from 'express'
 import { SessionService } from './session'
 
-export const createAuthMiddleware = (
-  sessionService: SessionService
-) => {
+export const createAuthMiddleware = (sessionService: SessionService) => {
   const verifySession = async (
     req: Request,
     res: Response,
